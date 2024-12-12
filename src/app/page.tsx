@@ -21,16 +21,11 @@ import {
   Shield,
   BadgeCheck,
   ChevronRight,
+  GraduationCap,
 } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from '@/components/ui/accordion';
 
 export default function Home() {
   const upcomingIpos = mockIpos
@@ -155,7 +150,7 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Enhanced Educational Section */}
+      {/* Educational Section */}
       <div className="bg-muted/50 py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
@@ -165,145 +160,82 @@ export default function Home() {
               decisions
             </p>
           </div>
-          <div className="mt-12">
-            <Accordion type="single" collapsible className="w-full">
-              <AccordionItem value="ipo-basics">
-                <AccordionTrigger className="text-xl font-semibold">
-                  <span className="flex items-center gap-2">
-                    <BookOpen className="h-5 w-5 text-primary" />
-                    IPO Basics
-                  </span>
-                </AccordionTrigger>
-                <AccordionContent>
-                  <div className="grid gap-4 p-4">
-                    <div className="flex items-start gap-4">
-                      <Badge variant="outline" className="mt-1">
-                        01
-                      </Badge>
-                      <div>
-                        <h4 className="font-semibold">What is an IPO?</h4>
-                        <p className="text-muted-foreground">
-                          An Initial Public Offering (IPO) is the process of
-                          offering shares of a private company to the public
-                          through a new stock issuance.
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-start gap-4">
-                      <Badge variant="outline" className="mt-1">
-                        02
-                      </Badge>
-                      <div>
-                        <h4 className="font-semibold">IPO Process</h4>
-                        <p className="text-muted-foreground">
-                          Companies must meet SEC requirements and financial
-                          thresholds for transparency and regulatory compliance
-                          before going public.
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-start gap-4">
-                      <Badge variant="outline" className="mt-1">
-                        03
-                      </Badge>
-                      <div>
-                        <h4 className="font-semibold">Key Terms</h4>
-                        <p className="text-muted-foreground">
-                          Understanding offer price, lot size, listing gains,
-                          and other essential IPO terminology.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </AccordionContent>
-              </AccordionItem>
-
-              <AccordionItem value="market-analysis">
-                <AccordionTrigger className="text-xl font-semibold">
-                  <span className="flex items-center gap-2">
-                    <LineChart className="h-5 w-5 text-primary" />
-                    Market Analysis
-                  </span>
-                </AccordionTrigger>
-                <AccordionContent>
-                  <div className="grid gap-4 p-4">
-                    <div className="flex items-start gap-4">
-                      <Badge variant="outline" className="mt-1">
-                        01
-                      </Badge>
-                      <div>
-                        <h4 className="font-semibold">Market Conditions</h4>
-                        <p className="text-muted-foreground">
-                          Evaluating overall market sentiment, sector
-                          performance, and economic indicators.
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-start gap-4">
-                      <Badge variant="outline" className="mt-1">
-                        02
-                      </Badge>
-                      <div>
-                        <h4 className="font-semibold">Valuation Metrics</h4>
-                        <p className="text-muted-foreground">
-                          Understanding P/E ratios, revenue growth, market
-                          share, and competitive analysis.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </AccordionContent>
-              </AccordionItem>
-
-              <AccordionItem value="investment-strategy">
-                <AccordionTrigger className="text-xl font-semibold">
-                  <span className="flex items-center gap-2">
-                    <Shield className="h-5 w-5 text-primary" />
-                    Investment Strategy
-                  </span>
-                </AccordionTrigger>
-                <AccordionContent>
-                  <div className="grid gap-4 p-4">
-                    <div className="flex items-start gap-4">
-                      <Badge variant="outline" className="mt-1">
-                        01
-                      </Badge>
-                      <div>
-                        <h4 className="font-semibold">Risk Assessment</h4>
-                        <p className="text-muted-foreground">
-                          Evaluating company fundamentals, management team,
-                          business model, and market potential.
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-start gap-4">
-                      <Badge variant="outline" className="mt-1">
-                        02
-                      </Badge>
-                      <div>
-                        <h4 className="font-semibold">Investment Timeline</h4>
-                        <p className="text-muted-foreground">
-                          Short-term vs long-term investment strategies for IPO
-                          participation.
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-start gap-4">
-                      <Badge variant="outline" className="mt-1">
-                        03
-                      </Badge>
-                      <div>
-                        <h4 className="font-semibold">Portfolio Allocation</h4>
-                        <p className="text-muted-foreground">
-                          Guidelines for determining appropriate position sizes
-                          and portfolio diversification.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
+          <div className="mt-12 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+            <Card className="hover:shadow-lg transition-all">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <BookOpen className="h-5 w-5 text-primary" />
+                  IPO Basics
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground">
+                  Learn the fundamentals of Initial Public Offerings, including
+                  the process, terminology, and key factors to consider before
+                  investing.
+                </p>
+              </CardContent>
+              <CardFooter>
+                <Link href="/learn#basics" className="w-full">
+                  <Button variant="ghost" className="w-full">
+                    Learn More
+                    <ChevronRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </Link>
+              </CardFooter>
+            </Card>
+            <Card className="hover:shadow-lg transition-all">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <LineChart className="h-5 w-5 text-primary" />
+                  Market Analysis
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground">
+                  Understand market conditions, sector performance, and timing
+                  considerations that can affect IPO success.
+                </p>
+              </CardContent>
+              <CardFooter>
+                <Link href="/learn#market-analysis" className="w-full">
+                  <Button variant="ghost" className="w-full">
+                    Learn More
+                    <ChevronRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </Link>
+              </CardFooter>
+            </Card>
+            <Card className="hover:shadow-lg transition-all">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Shield className="h-5 w-5 text-primary" />
+                  Investment Strategy
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground">
+                  Develop effective strategies for participating in IPOs,
+                  including risk assessment and portfolio allocation.
+                </p>
+              </CardContent>
+              <CardFooter>
+                <Link href="/learn#strategy" className="w-full">
+                  <Button variant="ghost" className="w-full">
+                    Learn More
+                    <ChevronRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </Link>
+              </CardFooter>
+            </Card>
+          </div>
+          <div className="mt-12 text-center">
+            <Link href="/learn">
+              <Button size="lg" variant="outline" className="gap-2">
+                <GraduationCap className="h-5 w-5" />
+                Visit Learning Center
+              </Button>
+            </Link>
           </div>
         </div>
       </div>
