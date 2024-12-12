@@ -269,50 +269,6 @@ export default function Home() {
         </div>
       </div>
 
-      {/* IPO Calendar Section */}
-      <div className="py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center mb-8">
-            <h2 className="text-3xl font-bold">IPO Calendar</h2>
-            <Button variant="outline">View Full Calendar</Button>
-          </div>
-          <Card className="p-6">
-            <div className="grid grid-cols-7 gap-2 mb-4">
-              {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day) => (
-                <div
-                  key={day}
-                  className="text-center text-sm font-medium text-muted-foreground"
-                >
-                  {day}
-                </div>
-              ))}
-            </div>
-            <div className="grid grid-cols-7 gap-2">
-              {Array.from({ length: 31 }, (_, i) => {
-                const day = i + 1;
-                const ipoCount =
-                  ipoCountsByDate[day as keyof typeof ipoCountsByDate];
-
-                return (
-                  <Button
-                    key={day}
-                    variant="ghost"
-                    className="aspect-square relative hover:bg-primary/10"
-                  >
-                    {day}
-                    {ipoCount && (
-                      <Badge className="absolute -top-2 -right-2 h-5 w-5 p-0 flex items-center justify-center">
-                        {ipoCount}
-                      </Badge>
-                    )}
-                  </Button>
-                );
-              })}
-            </div>
-          </Card>
-        </div>
-      </div>
-
       {/* IPO Comparison Tool */}
       <div className="py-12 bg-muted/30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
