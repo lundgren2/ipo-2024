@@ -26,16 +26,34 @@ import {
   Percent,
   TrendingDown,
   Award,
+  Download,
+  Share,
 } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import Image from 'next/image';
+import { Input } from '@/components/ui/input';
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from '@/components/ui/select';
 
 export default function Home() {
   const upcomingIpos = mockIpos
     .filter((ipo) => ipo.status === 'Upcoming')
     .slice(0, 3);
+
+  // Add a constant map for IPO counts
+  const ipoCountsByDate = {
+    5: 2,
+    12: 1,
+    15: 3,
+    22: 2,
+  } as const;
 
   return (
     <div className="relative">
@@ -213,6 +231,158 @@ export default function Home() {
               </Card>
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* Newsletter & Quick Actions Section */}
+      <div className="py-12 bg-muted/30">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid md:grid-cols-2 gap-8">
+            <div className="bg-card p-8 rounded-lg border shadow-sm">
+              <h3 className="text-2xl font-bold mb-2">Stay Updated</h3>
+              <p className="text-muted-foreground mb-6">
+                Get the latest IPO news and alerts directly in your inbox.
+              </p>
+              <div className="flex gap-2">
+                <Input placeholder="Enter your email" className="max-w-md" />
+                <Button>Subscribe</Button>
+              </div>
+            </div>
+            <div>
+              <h3 className="text-2xl font-bold mb-6">Quick Actions</h3>
+              <div className="flex gap-4 flex-wrap">
+                <Button variant="outline" className="gap-2">
+                  <Bell className="h-4 w-4" />
+                  Set IPO Alerts
+                </Button>
+                <Button variant="outline" className="gap-2">
+                  <Download className="h-4 w-4" />
+                  Download Report
+                </Button>
+                <Button variant="outline" className="gap-2">
+                  <Share className="h-4 w-4" />
+                  Share Analysis
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* IPO Calendar Section */}
+      <div className="py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center mb-8">
+            <h2 className="text-3xl font-bold">IPO Calendar</h2>
+            <Button variant="outline">View Full Calendar</Button>
+          </div>
+          <Card className="p-6">
+            <div className="grid grid-cols-7 gap-2 mb-4">
+              {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day) => (
+                <div
+                  key={day}
+                  className="text-center text-sm font-medium text-muted-foreground"
+                >
+                  {day}
+                </div>
+              ))}
+            </div>
+            <div className="grid grid-cols-7 gap-2">
+              {Array.from({ length: 31 }, (_, i) => {
+                const day = i + 1;
+                const ipoCount =
+                  ipoCountsByDate[day as keyof typeof ipoCountsByDate];
+
+                return (
+                  <Button
+                    key={day}
+                    variant="ghost"
+                    className="aspect-square relative hover:bg-primary/10"
+                  >
+                    {day}
+                    {ipoCount && (
+                      <Badge className="absolute -top-2 -right-2 h-5 w-5 p-0 flex items-center justify-center">
+                        {ipoCount}
+                      </Badge>
+                    )}
+                  </Button>
+                );
+              })}
+            </div>
+          </Card>
+        </div>
+      </div>
+
+      {/* IPO Comparison Tool */}
+      <div className="py-12 bg-muted/30">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-3xl font-bold mb-8">Compare IPOs</h2>
+          <Card className="p-6">
+            <div className="grid md:grid-cols-2 gap-8">
+              <div className="space-y-4">
+                <Select>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select First IPO" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="reddit">Reddit (RDDT)</SelectItem>
+                    <SelectItem value="shein">Shein</SelectItem>
+                    <SelectItem value="stripe">Stripe</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Card className="p-4">
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Valuation</span>
+                      <span className="font-medium">$15B</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Share Price</span>
+                      <span className="font-medium">$31.50 - $34.00</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Market Cap</span>
+                      <span className="font-medium">$748M</span>
+                    </div>
+                  </div>
+                </Card>
+              </div>
+              <div className="space-y-4">
+                <Select>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select Second IPO" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="reddit">Reddit (RDDT)</SelectItem>
+                    <SelectItem value="shein">Shein</SelectItem>
+                    <SelectItem value="stripe">Stripe</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Card className="p-4">
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Valuation</span>
+                      <span className="font-medium">$60B</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Share Price</span>
+                      <span className="font-medium">$45.00 - $50.00</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Market Cap</span>
+                      <span className="font-medium">$2.1B</span>
+                    </div>
+                  </div>
+                </Card>
+              </div>
+            </div>
+            <div className="mt-6 text-center">
+              <Button className="gap-2">
+                Compare Details
+                <ArrowRight className="h-4 w-4" />
+              </Button>
+            </div>
+          </Card>
         </div>
       </div>
 
