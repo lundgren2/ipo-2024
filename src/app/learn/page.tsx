@@ -22,6 +22,11 @@ import {
 import { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
+import { IPOTimeline } from '@/components/learning/ipo-timeline';
+import { MarketAnalysis } from '@/components/learning/market-analysis';
+import { Button } from '@/components/ui/button';
+import { IPOQuiz } from '@/components/learning/ipo-quiz';
+import { CaseStudies } from '@/components/learning/case-studies';
 
 const learningContent = [
   {
@@ -278,17 +283,14 @@ export default function LearnPage() {
           </TabsContent>
 
           <TabsContent value="visual" className="mt-6">
-            <div className="grid gap-6 md:grid-cols-2">
+            <div className="grid gap-6">
               <Card>
                 <CardContent className="pt-6">
                   <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
                     <PieChart className="h-5 w-5 text-primary" />
                     IPO Process Timeline
                   </h3>
-                  <div className="text-muted-foreground">
-                    Coming soon: Interactive timeline visualization of the IPO
-                    process
-                  </div>
+                  <IPOTimeline />
                 </CardContent>
               </Card>
               <Card>
@@ -297,28 +299,40 @@ export default function LearnPage() {
                     <TrendingUp className="h-5 w-5 text-primary" />
                     Market Analysis Framework
                   </h3>
-                  <div className="text-muted-foreground">
-                    Coming soon: Interactive market analysis framework
-                    visualization
-                  </div>
+                  <MarketAnalysis />
                 </CardContent>
               </Card>
             </div>
           </TabsContent>
 
           <TabsContent value="interactive" className="mt-6">
-            <div className="grid gap-6">
-              <Card>
-                <CardContent className="pt-6">
-                  <h3 className="text-lg font-semibold mb-4">
-                    Interactive Learning Modules
-                  </h3>
-                  <div className="text-muted-foreground">
-                    Coming soon: Interactive quizzes, case studies, and
-                    simulations
-                  </div>
-                </CardContent>
-              </Card>
+            <div className="grid gap-6 md:grid-cols-2">
+              <div className="space-y-6">
+                <Card>
+                  <CardContent className="pt-6">
+                    <h3 className="text-lg font-semibold mb-4">
+                      IPO Knowledge Quiz
+                    </h3>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      Test your understanding of IPO concepts and processes.
+                    </p>
+                    <IPOQuiz onProgress={(value) => setProgress(value)} />
+                  </CardContent>
+                </Card>
+              </div>
+              <div className="space-y-6">
+                <Card>
+                  <CardContent className="pt-6">
+                    <h3 className="text-lg font-semibold mb-4">
+                      IPO Case Studies
+                    </h3>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      Learn from real-world IPO examples and outcomes.
+                    </p>
+                    <CaseStudies />
+                  </CardContent>
+                </Card>
+              </div>
             </div>
           </TabsContent>
 
