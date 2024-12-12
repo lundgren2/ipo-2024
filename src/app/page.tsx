@@ -26,6 +26,7 @@ import {
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import Image from 'next/image';
 
 export default function Home() {
   const upcomingIpos = mockIpos
@@ -85,62 +86,109 @@ export default function Home() {
             </Button>
           </div>
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-xl">
+            <Card className="group relative overflow-hidden min-h-[400px]">
+              <div className="absolute inset-0">
+                <Image
+                  src="/images/reddit-ipo.jpg"
+                  alt="Reddit IPO"
+                  fill
+                  className="object-cover transition-transform group-hover:scale-105"
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                />
+                <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px]" />
+              </div>
+              <CardHeader className="relative z-10">
+                <CardTitle className="text-xl text-white">
                   Reddit Files for IPO, Aims to List on NYSE
                 </CardTitle>
-                <CardDescription>2 hours ago</CardDescription>
+                <CardDescription className="text-gray-200">
+                  2 hours ago
+                </CardDescription>
               </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">
+              <CardContent className="relative z-10">
+                <p className="text-gray-100">
                   Social media platform Reddit has officially filed for an
                   initial public offering, planning to list its shares on the
-                  New York Stock Exchange under the ticker 'RDDT'.
+                  New York Stock Exchange under the ticker &quot;RDDT&quot;.
                 </p>
               </CardContent>
-              <CardFooter>
-                <Button variant="ghost" className="gap-2">
+              <CardFooter className="relative z-10">
+                <Button
+                  variant="secondary"
+                  className="gap-2 bg-white/10 hover:bg-white/20 text-white"
+                >
                   Read More <ChevronRight className="h-4 w-4" />
                 </Button>
               </CardFooter>
             </Card>
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-xl">
+
+            <Card className="group relative overflow-hidden min-h-[400px]">
+              <div className="absolute inset-0">
+                <Image
+                  src="/images/shein-ipo.jpg"
+                  alt="Shein IPO"
+                  fill
+                  className="object-cover transition-transform group-hover:scale-105"
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                />
+                <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px]" />
+              </div>
+              <CardHeader className="relative z-10">
+                <CardTitle className="text-xl text-white">
                   Shein Confidentially Files for US IPO
                 </CardTitle>
-                <CardDescription>5 hours ago</CardDescription>
+                <CardDescription className="text-gray-200">
+                  5 hours ago
+                </CardDescription>
               </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">
+              <CardContent className="relative z-10">
+                <p className="text-gray-100">
                   Fast-fashion giant Shein has confidentially filed to go public
                   in the United States, potentially becoming one of the biggest
                   IPOs in recent years.
                 </p>
               </CardContent>
-              <CardFooter>
-                <Button variant="ghost" className="gap-2">
+              <CardFooter className="relative z-10">
+                <Button
+                  variant="secondary"
+                  className="gap-2 bg-white/10 hover:bg-white/20 text-white"
+                >
                   Read More <ChevronRight className="h-4 w-4" />
                 </Button>
               </CardFooter>
             </Card>
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-xl">
+
+            <Card className="group relative overflow-hidden min-h-[400px]">
+              <div className="absolute inset-0">
+                <Image
+                  src="/images/stripe-ipo.jpg"
+                  alt="Stripe IPO"
+                  fill
+                  className="object-cover transition-transform group-hover:scale-105"
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                />
+                <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px]" />
+              </div>
+              <CardHeader className="relative z-10">
+                <CardTitle className="text-xl text-white">
                   Stripe Evaluates 2024 IPO Plans
                 </CardTitle>
-                <CardDescription>1 day ago</CardDescription>
+                <CardDescription className="text-gray-200">
+                  1 day ago
+                </CardDescription>
               </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">
+              <CardContent className="relative z-10">
+                <p className="text-gray-100">
                   Payment processing giant Stripe is reportedly in early
                   discussions with investment banks about a potential IPO in
                   2024.
                 </p>
               </CardContent>
-              <CardFooter>
-                <Button variant="ghost" className="gap-2">
+              <CardFooter className="relative z-10">
+                <Button
+                  variant="secondary"
+                  className="gap-2 bg-white/10 hover:bg-white/20 text-white"
+                >
                   Read More <ChevronRight className="h-4 w-4" />
                 </Button>
               </CardFooter>
