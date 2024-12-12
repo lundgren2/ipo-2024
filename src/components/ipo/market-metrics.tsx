@@ -1,7 +1,9 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { Card } from '@/components/ui/card';
-import { TrendingUp } from 'lucide-react';
+import { fetchIPOPerformance } from '@/services/ipo-service';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export type MarketMetric = {
   label: string;
@@ -10,48 +12,6 @@ export type MarketMetric = {
   trendDirection?: 'up' | 'down';
   subtext: string;
 };
-
-const marketMetrics: MarketMetric[] = [
-  {
-    label: 'Total IPOs',
-    value: '24',
-    trend: '+15%',
-    trendDirection: 'up',
-    subtext: 'This Quarter',
-  },
-  {
-    label: 'Average Valuation',
-    value: '$2.8B',
-    trend: '+12%',
-    trendDirection: 'up',
-    subtext: 'vs Last Quarter',
-  },
-  {
-    label: 'Success Rate',
-    value: '92%',
-    trend: '+5%',
-    trendDirection: 'up',
-    subtext: 'Above Target Price',
-  },
-  {
-    label: 'Market Sentiment',
-    value: 'Bullish',
-    subtext: 'Strong Demand',
-  },
-  {
-    label: 'Avg. First Day Return',
-    value: '+32%',
-    trendDirection: 'up',
-    subtext: 'Last 30 Days',
-  },
-  {
-    label: 'Total Capital Raised',
-    value: '$18.5B',
-    trend: '+28%',
-    trendDirection: 'up',
-    subtext: 'This Quarter',
-  },
-];
 
 interface MarketMetricsProps {
   onMetricSelect?: (metric: string) => void;
@@ -62,10 +22,71 @@ export function MarketMetrics({
   onMetricSelect,
   selectedMetric,
 }: MarketMetricsProps) {
+  const [loading, setLoading] = useState(true);
+  const [metrics, setMetrics] = useState<MarketMetric[]>([]);
+
+  useEffect(() => {
+    async function loadMetrics() {
+      try {
+        const performance = await fetchIPOPerformance();
+        setMetrics([
+          {
+            label: 'Average Return',
+            value: performance.averageReturn,
+            trend: '+12%',
+            trendDirection: 'up',
+            subtext: 'vs Last Quarter',
+          },
+          {
+            label: 'Success Rate',
+            value: performance.successRate,
+            trend: '+5%',
+            trendDirection: 'up',
+            subtext: 'Above Target Price',
+          },
+          {
+            label: 'Market Sentiment',
+            value: performance.marketSentiment,
+            subtext: 'Strong Demand',
+          },
+          {
+            label: 'Total Volume',
+            value: performance.totalVolume,
+            trend: '+28%',
+            trendDirection: 'up',
+            subtext: 'This Quarter',
+          },
+        ]);
+        setLoading(false);
+      } catch (error) {
+        console.error('Error loading market metrics:', error);
+        setLoading(false);
+      }
+    }
+
+    loadMetrics();
+  }, []);
+
+  if (loading) {
+    return (
+      <Card className="p-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {Array.from({ length: 4 }).map((_, index) => (
+            <div key={index} className="text-center p-4">
+              <Skeleton className="h-4 w-24 mx-auto mb-2" />
+              <Skeleton className="h-8 w-32 mx-auto mb-2" />
+              <Skeleton className="h-4 w-20 mx-auto" />
+            </div>
+          ))}
+        </div>
+      </Card>
+    );
+  }
+
   return (
-    <Card className="p-6 mb-8">
-      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
-        {marketMetrics.map((metric, index) => (
+    <Card className="p-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {metrics.map((metric, index) => (
           <div
             key={index}
             className={`text-center p-4 rounded-lg transition-colors ${
