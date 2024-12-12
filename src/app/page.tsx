@@ -1,101 +1,222 @@
-import Image from "next/image";
+'use client';
+
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { mockIpos } from '@/lib/mock-data';
+import {
+  ArrowRight,
+  BookOpen,
+  Calendar,
+  DollarSign,
+  LineChart,
+  Users,
+} from 'lucide-react';
+import Link from 'next/link';
+import { Button } from '@/components/ui/button';
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  const upcomingIpos = mockIpos
+    .filter((ipo) => ipo.status === 'Upcoming')
+    .slice(0, 3);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  return (
+    <div className="relative">
+      {/* Hero section */}
+      <div className="relative bg-background">
+        <div className="max-w-7xl mx-auto pt-20 pb-16 px-4 sm:px-6 lg:px-8">
+          <div className="text-center">
+            <h1 className="text-4xl tracking-tight font-extrabold sm:text-5xl md:text-6xl">
+              <span className="block">Track the Latest</span>
+              <span className="block text-primary">
+                Initial Public Offerings
+              </span>
+            </h1>
+            <p className="mt-3 max-w-md mx-auto text-muted-foreground sm:text-lg md:mt-5 md:text-xl md:max-w-3xl">
+              Stay informed about upcoming IPOs, track performance, and make
+              informed investment decisions with our comprehensive IPO tracking
+              platform.
+            </p>
+            <div className="mt-5 max-w-md mx-auto sm:flex sm:justify-center md:mt-8">
+              <div className="rounded-md shadow">
+                <Link href="/ipos">
+                  <Button size="lg" className="w-full sm:w-auto">
+                    View Latest IPOs
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </Link>
+              </div>
+              <div className="mt-3 sm:mt-0 sm:ml-3">
+                <Link href="/timeline">
+                  <Button
+                    variant="outline"
+                    size="lg"
+                    className="w-full sm:w-auto"
+                  >
+                    View Timeline
+                    <Calendar className="ml-2 h-4 w-4" />
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          </div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      </div>
+
+      {/* Featured IPOs Section */}
+      <div className="py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center">
+            <h2 className="text-3xl font-extrabold">Upcoming IPOs</h2>
+            <p className="mt-4 text-lg text-muted-foreground">
+              Stay up to date with the most anticipated public offerings
+            </p>
+          </div>
+          <div className="mt-12 grid gap-6 lg:grid-cols-3">
+            {upcomingIpos.map((ipo) => (
+              <Card key={ipo.id}>
+                <CardHeader>
+                  <CardTitle>{ipo.companyName}</CardTitle>
+                  <CardDescription>{ipo.description}</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <dl className="grid grid-cols-1 gap-4">
+                    <div className="flex items-center justify-between border-t pt-4">
+                      <dt className="text-sm font-medium text-muted-foreground">
+                        Expected Date
+                      </dt>
+                      <dd className="text-sm text-foreground">
+                        {ipo.expectedDate}
+                      </dd>
+                    </div>
+                    <div className="flex items-center justify-between border-t pt-4">
+                      <dt className="text-sm font-medium text-muted-foreground">
+                        Price Range
+                      </dt>
+                      <dd className="text-sm text-foreground">
+                        {ipo.priceRange}
+                      </dd>
+                    </div>
+                    <div className="flex items-center justify-between border-t pt-4">
+                      <dt className="text-sm font-medium text-muted-foreground">
+                        Exchange
+                      </dt>
+                      <dd className="text-sm text-foreground">
+                        {ipo.exchange}
+                      </dd>
+                    </div>
+                  </dl>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Educational Section */}
+      <div className="bg-muted/50 py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center">
+            <h2 className="text-3xl font-extrabold">Learn About IPOs</h2>
+            <p className="mt-4 text-lg text-muted-foreground">
+              Understanding the IPO process and making informed investment
+              decisions
+            </p>
+          </div>
+          <div className="mt-12 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <BookOpen className="h-5 w-5" />
+                  IPO Basics
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground">
+                  Learn the fundamentals of Initial Public Offerings, including
+                  the process, terminology, and key factors to consider before
+                  investing.
+                </p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <LineChart className="h-5 w-5" />
+                  Market Analysis
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground">
+                  Understand market conditions, sector performance, and timing
+                  considerations that can affect IPO success.
+                </p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <DollarSign className="h-5 w-5" />
+                  Investment Strategy
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground">
+                  Develop effective strategies for participating in IPOs,
+                  including risk assessment and portfolio allocation.
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </div>
+
+      {/* Why Choose Us Section */}
+      <div className="py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center">
+            <h2 className="text-3xl font-extrabold">Why Choose Our Platform</h2>
+            <p className="mt-4 text-lg text-muted-foreground">
+              The most comprehensive IPO tracking and analysis platform
+            </p>
+          </div>
+          <div className="mt-12 grid gap-8 md:grid-cols-2">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Users className="h-5 w-5" />
+                  Community Insights
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground">
+                  Join a community of investors sharing insights, analysis, and
+                  experiences with IPO investments. Learn from others and make
+                  informed decisions.
+                </p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Calendar className="h-5 w-5" />
+                  Real-time Updates
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground">
+                  Stay updated with real-time notifications about upcoming IPOs,
+                  price changes, and important announcements.
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
