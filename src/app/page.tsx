@@ -75,6 +75,80 @@ export default function Home() {
         </div>
       </div>
 
+      {/* Latest IPO News Section */}
+      <div className="bg-muted/30 py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center mb-8">
+            <h2 className="text-3xl font-extrabold">Latest IPO News</h2>
+            <Button variant="outline" className="gap-2">
+              View All News <ArrowRight className="h-4 w-4" />
+            </Button>
+          </div>
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-xl">
+                  Reddit Files for IPO, Aims to List on NYSE
+                </CardTitle>
+                <CardDescription>2 hours ago</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground">
+                  Social media platform Reddit has officially filed for an
+                  initial public offering, planning to list its shares on the
+                  New York Stock Exchange under the ticker 'RDDT'.
+                </p>
+              </CardContent>
+              <CardFooter>
+                <Button variant="ghost" className="gap-2">
+                  Read More <ChevronRight className="h-4 w-4" />
+                </Button>
+              </CardFooter>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-xl">
+                  Shein Confidentially Files for US IPO
+                </CardTitle>
+                <CardDescription>5 hours ago</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground">
+                  Fast-fashion giant Shein has confidentially filed to go public
+                  in the United States, potentially becoming one of the biggest
+                  IPOs in recent years.
+                </p>
+              </CardContent>
+              <CardFooter>
+                <Button variant="ghost" className="gap-2">
+                  Read More <ChevronRight className="h-4 w-4" />
+                </Button>
+              </CardFooter>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-xl">
+                  Stripe Evaluates 2024 IPO Plans
+                </CardTitle>
+                <CardDescription>1 day ago</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground">
+                  Payment processing giant Stripe is reportedly in early
+                  discussions with investment banks about a potential IPO in
+                  2024.
+                </p>
+              </CardContent>
+              <CardFooter>
+                <Button variant="ghost" className="gap-2">
+                  Read More <ChevronRight className="h-4 w-4" />
+                </Button>
+              </CardFooter>
+            </Card>
+          </div>
+        </div>
+      </div>
+
       {/* Enhanced Upcoming IPOs Section */}
       <div className="py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
