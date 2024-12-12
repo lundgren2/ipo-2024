@@ -13,42 +13,37 @@ import {
 } from '@/components/ui/select';
 import { IPOCard } from './ipo-card';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useWatchlist, WatchedIPO } from '@/context/watchlist-context';
 
-export type IPO = {
-  id: number;
-  name: string;
-  date: string;
-  status: string;
-  valuation: string;
-  sector: string;
-  exchange: string;
-  trend: string;
-  interest: string;
+export type IPO = Omit<WatchedIPO, 'isFavorite'> & {
   highlights: string[];
+  interest: string;
 };
 
 const mockIpos: IPO[] = [
   {
-    id: 1,
+    id: '1',
     name: 'Reddit (RDDT)',
     date: 'Mar 21, 2024',
     status: 'Next Week',
     valuation: '$15B',
     sector: 'Technology',
     exchange: 'NYSE',
-    trend: '+12%',
+    change: '+12%',
+    isPositive: true,
     interest: 'High',
     highlights: ['Social Media Giant', '500M+ Monthly Users', 'AI Integration'],
   },
   {
-    id: 2,
+    id: '2',
     name: 'Shein',
     date: 'Apr 5, 2024',
     status: 'Coming Soon',
     valuation: '$60B',
     sector: 'Retail',
     exchange: 'NYSE',
-    trend: '+8%',
+    change: '+8%',
+    isPositive: true,
     interest: 'Very High',
     highlights: [
       'Fast Fashion Leader',
@@ -57,14 +52,15 @@ const mockIpos: IPO[] = [
     ],
   },
   {
-    id: 3,
+    id: '3',
     name: 'Stripe',
     date: 'Q2 2024',
     status: 'Coming Soon',
     valuation: '$95B',
     sector: 'Finance',
     exchange: 'NASDAQ',
-    trend: '+15%',
+    change: '+15%',
+    isPositive: true,
     interest: 'Extreme',
     highlights: [
       'Payment Processing Leader',
@@ -75,6 +71,7 @@ const mockIpos: IPO[] = [
 ];
 
 export function IPOList() {
+  const { isWatched, addToWatchlist, removeFromWatchlist } = useWatchlist();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSector, setSelectedSector] = useState('all');
   const [selectedExchange, setSelectedExchange] = useState('all');
@@ -164,7 +161,16 @@ export function IPOList() {
                 <Skeleton className="h-24 w-full" />
               </Card>
             ))
-          : filteredIpos.map((ipo) => <IPOCard key={ipo.id} ipo={ipo} />)}
+          : filteredIpos.map((ipo) => (
+              <IPOCard
+                key={ipo.id}
+                ipo={ipo}
+                isWatched={isWatched(ipo.id)}
+                onToggleWatch={(watched) =>
+                  watched ? addToWatchlist(ipo) : removeFromWatchlist(ipo.id)
+                }
+              />
+            ))}
       </div>
     </div>
   );

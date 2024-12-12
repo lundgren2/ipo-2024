@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -10,41 +11,18 @@ import {
   BarChart3,
   ArrowUpRight,
   Users,
+  ChevronDown,
+  StarOff,
 } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { useWatchlist } from '@/context/watchlist-context';
 
-type WatchedIPO = {
-  name: string;
-  date: string;
-  change: string;
-  isPositive: boolean;
-};
-
-const watchedIpos: WatchedIPO[] = [
-  {
-    name: 'Reddit',
-    date: 'Mar 21',
-    change: '+15.2%',
-    isPositive: true,
-  },
-  {
-    name: 'Shein',
-    date: 'Apr 5',
-    change: '+8.4%',
-    isPositive: true,
-  },
-  {
-    name: 'Stripe',
-    date: 'Q2 2024',
-    change: '-3.1%',
-    isPositive: false,
-  },
-];
-
-const marketInsights = [
-  'Tech IPOs showing strong momentum in Q1',
-  'Retail sector IPOs outperforming expectations',
-  'Healthcare IPOs gaining investor interest',
-];
+type SortOption = 'name' | 'date' | 'change' | 'favorite';
 
 const marketStats = [
   {
@@ -67,7 +45,34 @@ const marketStats = [
   },
 ];
 
+const marketInsights = [
+  'Tech IPOs showing strong momentum in Q1',
+  'Retail sector IPOs outperforming expectations',
+  'Healthcare IPOs gaining investor interest',
+];
+
 export function Watchlist() {
+  const { watchedIpos, toggleFavorite, removeFromWatchlist } = useWatchlist();
+  const [sortBy, setSortBy] = useState<SortOption>('favorite');
+  const [showOnlyFavorites, setShowOnlyFavorites] = useState(false);
+
+  const sortedIpos = [...watchedIpos]
+    .filter((ipo) => !showOnlyFavorites || ipo.isFavorite)
+    .sort((a, b) => {
+      switch (sortBy) {
+        case 'name':
+          return a.name.localeCompare(b.name);
+        case 'date':
+          return new Date(a.date).getTime() - new Date(b.date).getTime();
+        case 'change':
+          return parseFloat(b.change) - parseFloat(a.change);
+        case 'favorite':
+          return Number(b.isFavorite) - Number(a.isFavorite);
+        default:
+          return 0;
+      }
+    });
+
   return (
     <Card className="p-4">
       <div className="space-y-4">
@@ -109,34 +114,99 @@ export function Watchlist() {
             <div className="flex items-center gap-2">
               <Star className="h-4 w-4 text-primary" />
               <h2 className="text-lg font-semibold">Watchlist</h2>
+              <Badge variant="secondary" className="text-xs">
+                {watchedIpos.length}
+              </Badge>
             </div>
-            <Button variant="outline" size="sm" className="h-8">
-              <Bell className="h-3 w-3 mr-1" />
-              Alerts
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8"
+                onClick={() => setShowOnlyFavorites(!showOnlyFavorites)}
+              >
+                {showOnlyFavorites ? (
+                  <StarOff className="h-3 w-3 mr-1" />
+                ) : (
+                  <Star className="h-3 w-3 mr-1" />
+                )}
+                {showOnlyFavorites ? 'Show All' : 'Favorites'}
+              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm" className="h-8">
+                    Sort
+                    <ChevronDown className="h-3 w-3 ml-1" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => setSortBy('favorite')}>
+                    By Favorite
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setSortBy('name')}>
+                    By Name
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setSortBy('date')}>
+                    By Date
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setSortBy('change')}>
+                    By Change
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           </div>
           <div className="space-y-1">
-            {watchedIpos.map((ipo, index) => (
+            {sortedIpos.map((ipo) => (
               <div
-                key={index}
-                className="flex items-center justify-between py-1.5 px-2 rounded-lg hover:bg-muted/50 transition-colors"
+                key={ipo.id}
+                className="flex items-center justify-between py-1.5 px-2 rounded-lg hover:bg-muted/50 transition-colors group"
               >
-                <div>
-                  <h3 className="text-sm font-medium leading-none mb-1">
-                    {ipo.name}
-                  </h3>
-                  <p className="text-xs text-muted-foreground leading-none">
-                    {ipo.date}
-                  </p>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => toggleFavorite(ipo.id)}
+                    className="opacity-0 group-hover:opacity-100 transition-opacity focus:opacity-100"
+                  >
+                    <Star
+                      className={`h-3 w-3 ${
+                        ipo.isFavorite
+                          ? 'fill-primary text-primary'
+                          : 'text-muted-foreground'
+                      }`}
+                    />
+                  </button>
+                  <div>
+                    <h3 className="text-sm font-medium leading-none mb-1">
+                      {ipo.name}
+                    </h3>
+                    <p className="text-xs text-muted-foreground leading-none">
+                      {ipo.date}
+                    </p>
+                  </div>
                 </div>
-                <Badge
-                  variant={ipo.isPositive ? 'default' : 'destructive'}
-                  className="text-xs px-1.5 py-0.5"
-                >
-                  {ipo.change}
-                </Badge>
+                <div className="flex items-center gap-2">
+                  <Badge
+                    variant={ipo.isPositive ? 'default' : 'destructive'}
+                    className="text-xs px-1.5 py-0.5"
+                  >
+                    {ipo.change}
+                  </Badge>
+                  <button
+                    onClick={() => removeFromWatchlist(ipo.id)}
+                    className="opacity-0 group-hover:opacity-100 transition-opacity focus:opacity-100 text-muted-foreground hover:text-destructive"
+                  >
+                    ×
+                  </button>
+                </div>
               </div>
             ))}
+            {sortedIpos.length === 0 && (
+              <div className="text-center py-4 text-sm text-muted-foreground">
+                {showOnlyFavorites
+                  ? 'No favorite IPOs yet'
+                  : 'No IPOs in watchlist'}
+              </div>
+            )}
           </div>
         </div>
 
