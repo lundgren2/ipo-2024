@@ -2,9 +2,9 @@ import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 import { ThemeProvider } from '@/components/theme-provider';
-import { Navbar } from '@/components/Navbar';
+import { WatchlistProvider } from '@/context/watchlist-context';
 import { Toaster } from '@/components/ui/toaster';
-
+import { Navbar } from '@/components/Navbar';
 const geistSans = Geist({
   variable: '--font-geist-sans',
   subsets: ['latin'],
@@ -23,9 +23,9 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <html lang="en" suppressHydrationWarning>
       <body
@@ -37,9 +37,11 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <Navbar />
-          <main>{children}</main>
-          <Toaster />
+          <WatchlistProvider>
+            <Navbar />
+            <main>{children}</main>
+            <Toaster />
+          </WatchlistProvider>
         </ThemeProvider>
       </body>
     </html>

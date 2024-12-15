@@ -1,88 +1,75 @@
 'use client';
 
-import { createContext, useContext, useState, ReactNode } from 'react';
+import {
+  createContext,
+  useContext,
+  useState,
+  useCallback,
+  useEffect,
+  ReactNode,
+} from 'react';
+import { IPO } from '@/types/ipo';
 
-export type WatchedIPO = {
-  id: string;
-  name: string;
-  date: string;
-  change: string;
-  isPositive: boolean;
-  isFavorite: boolean;
-  sector: string;
-  exchange: string;
-  valuation: string;
-};
-
-type WatchlistContextType = {
-  watchedIpos: WatchedIPO[];
-  addToWatchlist: (ipo: Omit<WatchedIPO, 'isFavorite'>) => void;
-  removeFromWatchlist: (id: string) => void;
-  toggleFavorite: (id: string) => void;
+interface WatchlistContextType {
+  watchedIpos: IPO[];
   isWatched: (id: string) => boolean;
-};
+  addToWatchlist: (ipo: IPO) => void;
+  removeFromWatchlist: (id: string) => void;
+}
 
 const WatchlistContext = createContext<WatchlistContextType | undefined>(
   undefined
 );
 
+const STORAGE_KEY = 'ipo-watchlist';
+
 export function WatchlistProvider({ children }: { children: ReactNode }) {
-  const [watchedIpos, setWatchedIpos] = useState<WatchedIPO[]>([
-    {
-      id: '1',
-      name: 'Reddit',
-      date: 'Mar 21',
-      change: '+15.2%',
-      isPositive: true,
-      isFavorite: true,
-      sector: 'Technology',
-      exchange: 'NYSE',
-      valuation: '$15B',
-    },
-    {
-      id: '2',
-      name: 'Shein',
-      date: 'Apr 5',
-      change: '+8.4%',
-      isPositive: true,
-      isFavorite: false,
-      sector: 'Retail',
-      exchange: 'NYSE',
-      valuation: '$60B',
-    },
-  ]);
+  const [watchedIpos, setWatchedIpos] = useState<IPO[]>([]);
 
-  const addToWatchlist = (ipo: Omit<WatchedIPO, 'isFavorite'>) => {
-    setWatchedIpos((current) => {
-      if (current.some((w) => w.id === ipo.id)) return current;
-      return [...current, { ...ipo, isFavorite: false }];
+  // Load watchlist from localStorage on mount
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        setWatchedIpos(JSON.parse(saved));
+      }
+    } catch (error) {
+      console.error('Failed to load watchlist:', error);
+    }
+  }, []);
+
+  // Save watchlist to localStorage whenever it changes
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(watchedIpos));
+    } catch (error) {
+      console.error('Failed to save watchlist:', error);
+    }
+  }, [watchedIpos]);
+
+  const isWatched = useCallback(
+    (id: string) => watchedIpos.some((ipo) => ipo.id === id),
+    [watchedIpos]
+  );
+
+  const addToWatchlist = useCallback((ipo: IPO) => {
+    setWatchedIpos((prev) => {
+      if (prev.some((item) => item.id === ipo.id)) return prev;
+      return [...prev, ipo];
     });
-  };
+  }, []);
 
-  const removeFromWatchlist = (id: string) => {
-    setWatchedIpos((current) => current.filter((ipo) => ipo.id !== id));
-  };
-
-  const toggleFavorite = (id: string) => {
-    setWatchedIpos((current) =>
-      current.map((ipo) =>
-        ipo.id === id ? { ...ipo, isFavorite: !ipo.isFavorite } : ipo
-      )
-    );
-  };
-
-  const isWatched = (id: string) => {
-    return watchedIpos.some((ipo) => ipo.id === id);
-  };
+  const removeFromWatchlist = useCallback((id: string) => {
+    setWatchedIpos((prev) => prev.filter((ipo) => ipo.id !== id));
+  }, []);
 
   return (
     <WatchlistContext.Provider
       value={{
         watchedIpos,
+        isWatched,
         addToWatchlist,
         removeFromWatchlist,
-        toggleFavorite,
-        isWatched,
       }}
     >
       {children}
