@@ -13,13 +13,7 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { NewsCard, FeaturedStory, MarketAnalysis } from '@/components/news';
-import {
-  featuredStory,
-  trendingNews,
-  marketAnalysis,
-  latestNews,
-  marketInsights,
-} from '@/lib/mock-news';
+import { getAllNews, marketInsights } from '@/lib/mock-news';
 import {
   ArrowRight,
   TrendingUp,
@@ -41,6 +35,9 @@ import { useIpoService } from '@/hooks/use-ipo-service';
 import { IPOCard } from '@/components/ipo/ipo-card';
 import { IPO } from '@/types/ipo';
 import { useWatchlist } from '@/context/watchlist-context';
+import { useEffect, useState } from 'react';
+import { NewsItem } from '@/lib/mock-news';
+import { NewsLoadingSkeleton } from '@/components/news/loading-skeleton';
 
 interface UpcomingIPO {
   id: string;
@@ -86,6 +83,59 @@ const upcomingIpos: UpcomingIPO[] = [
 export default function Home() {
   const { data: ipos, isLoading, error } = useIpoService();
   const { isWatched, addToWatchlist, removeFromWatchlist } = useWatchlist();
+  const [newsData, setNewsData] = useState<{
+    featured: Required<
+      Pick<
+        NewsItem,
+        | 'title'
+        | 'description'
+        | 'date'
+        | 'imageUrl'
+        | 'category'
+        | 'slug'
+        | 'author'
+      >
+    >;
+    trending: NewsItem[];
+    latest: NewsItem[];
+    analysis: NewsItem[];
+  } | null>(null);
+
+  useEffect(() => {
+    const loadNewsData = async () => {
+      try {
+        const allNews = await getAllNews();
+        const featured = allNews.find((news) => news.category === 'Featured');
+        const trending = allNews.filter((news) => news.category === 'Trending');
+        const latest = allNews.filter((news) => news.category === 'Latest');
+        const analysis = allNews.filter((news) => news.category === 'Analysis');
+
+        if (!featured?.author) {
+          console.error('Featured story is missing required author field');
+          return;
+        }
+
+        setNewsData({
+          featured: {
+            title: featured.title,
+            description: featured.description,
+            date: featured.date,
+            imageUrl: featured.imageUrl,
+            category: featured.category,
+            slug: featured.slug,
+            author: featured.author,
+          },
+          trending,
+          latest,
+          analysis,
+        });
+      } catch (error) {
+        console.error('Error loading news data:', error);
+      }
+    };
+
+    loadNewsData();
+  }, []);
 
   return (
     <div className="min-h-screen bg-background">
@@ -114,35 +164,41 @@ export default function Home() {
         <div className="grid lg:grid-cols-3 gap-8 mb-12">
           {/* Main Content - Left 2 Columns */}
           <div className="lg:col-span-2 space-y-8">
-            {/* Featured Story */}
-            <FeaturedStory {...featuredStory} />
+            {!newsData ? (
+              <NewsLoadingSkeleton />
+            ) : (
+              <>
+                {/* Featured Story */}
+                <FeaturedStory {...newsData.featured} />
 
-            {/* News Tabs */}
-            <Tabs defaultValue="trending" className="space-y-4">
-              <TabsList>
-                <TabsTrigger value="trending">Trending</TabsTrigger>
-                <TabsTrigger value="latest">Latest News</TabsTrigger>
-                <TabsTrigger value="analysis">Market Analysis</TabsTrigger>
-              </TabsList>
+                {/* News Tabs */}
+                <Tabs defaultValue="trending" className="space-y-4">
+                  <TabsList>
+                    <TabsTrigger value="trending">Trending</TabsTrigger>
+                    <TabsTrigger value="latest">Latest News</TabsTrigger>
+                    <TabsTrigger value="analysis">Market Analysis</TabsTrigger>
+                  </TabsList>
 
-              <TabsContent value="trending" className="space-y-4">
-                {trendingNews.map((news, index) => (
-                  <NewsCard key={index} {...news} />
-                ))}
-              </TabsContent>
+                  <TabsContent value="trending" className="space-y-4">
+                    {newsData.trending.map((news, index) => (
+                      <NewsCard key={index} {...news} />
+                    ))}
+                  </TabsContent>
 
-              <TabsContent value="latest" className="space-y-4">
-                {latestNews.map((news, index) => (
-                  <NewsCard key={index} {...news} />
-                ))}
-              </TabsContent>
+                  <TabsContent value="latest" className="space-y-4">
+                    {newsData.latest.map((news, index) => (
+                      <NewsCard key={index} {...news} />
+                    ))}
+                  </TabsContent>
 
-              <TabsContent value="analysis" className="space-y-4">
-                {marketAnalysis.map((analysis, index) => (
-                  <MarketAnalysis key={index} {...analysis} />
-                ))}
-              </TabsContent>
-            </Tabs>
+                  <TabsContent value="analysis" className="space-y-4">
+                    {newsData.analysis.map((analysis, index) => (
+                      <MarketAnalysis key={index} {...analysis} />
+                    ))}
+                  </TabsContent>
+                </Tabs>
+              </>
+            )}
           </div>
 
           {/* Sidebar - Right Column */}
