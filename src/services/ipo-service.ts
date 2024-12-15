@@ -152,13 +152,13 @@ export function formatMarketCap(value: number): string {
 // Helper function for retrying failed requests
 async function retryRequest<T>(
   fn: () => Promise<T>,
-  retries = CONFIG.CACHE.MAX_RETRIES,
-  delay = CONFIG.CACHE.RETRY_DELAY
+  retries: number = CONFIG.CACHE.MAX_RETRIES,
+  delay: number = CONFIG.CACHE.RETRY_DELAY
 ): Promise<T> {
   try {
     return await fn();
   } catch (error) {
-    if (retries === 0) throw error;
+    if (retries <= 0) throw error;
 
     await new Promise((resolve) => setTimeout(resolve, delay));
     return retryRequest(fn, retries - 1, delay * 2);
