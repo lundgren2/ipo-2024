@@ -35,7 +35,7 @@ import {
   TrendingUp,
 } from 'lucide-react';
 import { fetchIPODetails } from '@/services/ipo-service';
-import type { IPO } from './ipo-list';
+import { IPO, CompanyDetails } from '@/types/ipo';
 import { useWatchlist } from '@/context/watchlist-context';
 import { useToast } from '@/hooks/use-toast';
 import Image from 'next/image';
@@ -44,38 +44,6 @@ interface IPODetailsProps {
   ipo: IPO;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-}
-
-interface CompanyDetails {
-  weburl?: string;
-  name?: string;
-  logo?: string;
-  finnhubIndustry?: string;
-  country?: string;
-  currency?: string;
-  exchange?: string;
-  ipo?: string;
-  marketCapitalization?: number;
-  shareOutstanding?: number;
-  phone?: string;
-  description?: string;
-  [key: string]: string | number | undefined;
-}
-
-// Add API response type
-interface FinnhubCompanyResponse {
-  weburl: string;
-  name: string;
-  logo: string;
-  finnhubIndustry: string;
-  country: string;
-  currency: string;
-  exchange: string;
-  ipo: string;
-  marketCapitalization: number;
-  shareOutstanding: number;
-  phone: string;
-  description: string;
 }
 
 interface PriceDataPoint {
@@ -126,25 +94,11 @@ export function IPODetails({ ipo, open, onOpenChange }: IPODetailsProps) {
 
     try {
       setLoading(true);
-      const symbol = ipo.name.match(/\((.*?)\)/)?.[1] || '';
-      const response = await fetchIPODetails(symbol);
+      const symbol = ipo.symbol || ipo.name.match(/\((.*?)\)/)?.[1] || '';
+      const details = await fetchIPODetails(symbol);
 
-      if (response) {
-        const apiResponse = response as Partial<FinnhubCompanyResponse>;
-        setCompanyDetails({
-          weburl: apiResponse.weburl,
-          name: apiResponse.name,
-          logo: apiResponse.logo,
-          finnhubIndustry: apiResponse.finnhubIndustry,
-          country: apiResponse.country,
-          currency: apiResponse.currency,
-          exchange: apiResponse.exchange,
-          ipo: apiResponse.ipo,
-          marketCapitalization: apiResponse.marketCapitalization,
-          shareOutstanding: apiResponse.shareOutstanding,
-          phone: apiResponse.phone,
-          description: apiResponse.description,
-        });
+      if (details) {
+        setCompanyDetails(details);
       }
     } catch (error) {
       console.error('Error loading IPO details:', error);
@@ -156,7 +110,7 @@ export function IPODetails({ ipo, open, onOpenChange }: IPODetailsProps) {
     } finally {
       setLoading(false);
     }
-  }, [open, ipo.name, toast]);
+  }, [open, ipo.name, ipo.symbol, toast]);
 
   useEffect(() => {
     if (open) {

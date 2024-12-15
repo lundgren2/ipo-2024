@@ -1,7 +1,13 @@
 'use client';
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { Search, SlidersHorizontal } from 'lucide-react';
+import {
+  Search,
+  SlidersHorizontal,
+  Calendar,
+  TrendingUp,
+  Building2,
+} from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import {
@@ -13,8 +19,13 @@ import {
 } from '@/components/ui/select';
 import { IPOCard } from '@/components/ipo/ipo-card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useWatchlist, WatchedIPO } from '@/context/watchlist-context';
-import { fetchUpcomingIPOs } from '@/services/ipo-service';
+import { useWatchlist } from '@/context/watchlist-context';
+import {
+  fetchUpcomingIPOs,
+  formatMarketCap,
+  parseDate,
+  parseValuation,
+} from '@/services/ipo-service';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import {
@@ -25,13 +36,8 @@ import {
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { useDebounce } from '@/hooks/use-debounce';
-
-export type IPO = Omit<WatchedIPO, 'isFavorite'> & {
-  highlights: string[];
-  interest: string;
-  status: string;
-  logo?: string;
-};
+import { IPO } from '@/types/ipo';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 type SortOption = 'date' | 'name' | 'valuation';
 
@@ -41,51 +47,12 @@ interface IPOListProps {
 
 type FilterKey = 'searchQuery' | 'sector' | 'exchange' | 'sortBy' | 'limit';
 
-type FilterValue = string | number | SortOption;
-
 interface Filters {
   searchQuery: string;
   sector: string;
   exchange: string;
   sortBy: SortOption;
   limit: number;
-}
-
-// Move parsing functions outside component and memoize results
-const dateCache = new Map<string, number>();
-function parseDate(dateStr: string): number {
-  if (dateCache.has(dateStr)) {
-    return dateCache.get(dateStr)!;
-  }
-  try {
-    const timestamp = new Date(dateStr).getTime();
-    dateCache.set(dateStr, timestamp);
-    return timestamp;
-  } catch {
-    return 0;
-  }
-}
-
-const valuationCache = new Map<string, number>();
-function parseValuation(val: string): number {
-  if (valuationCache.has(val)) {
-    return valuationCache.get(val)!;
-  }
-  try {
-    const numStr = val.replace(/[^0-9.]/g, '');
-    const multiplier = val.includes('T')
-      ? 1e12
-      : val.includes('B')
-      ? 1e9
-      : val.includes('M')
-      ? 1e6
-      : 1;
-    const result = parseFloat(numStr) * multiplier;
-    valuationCache.set(val, result);
-    return result;
-  } catch {
-    return 0;
-  }
 }
 
 // Add minimum loading time constant
