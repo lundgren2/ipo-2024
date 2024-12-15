@@ -299,11 +299,11 @@ export async function fetchIPODetails(
 
     // Validate required fields
     if (!data || !data.ticker || !data.name) {
-      console.warn('Invalid company details received:', {
-        identifier,
-        type,
-        data,
-      });
+      // console.warn('Invalid company details received:', {
+      //   identifier,
+      //   type,
+      //   data,
+      // });
       return null;
     }
 
