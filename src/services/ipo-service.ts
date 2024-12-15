@@ -1,6 +1,27 @@
 import { IPO } from '@/components/ipo/ipo-list';
 
-const FINNHUB_API_KEY = process.env.NEXT_PUBLIC_FINNHUB_API_KEY || '';
+// Update default logo URL to use SVG
+const DEFAULT_LOGO = '/images/default-company-logo.svg';
+
+// Cache duration in milliseconds (1 hour)
+const CACHE_DURATION = 3600 * 1000;
+
+// Client-side cache
+interface CacheEntry<T> {
+  data: T;
+  timestamp: number;
+}
+
+// Define interface for company details
+interface CompanyDetails {
+  logo?: string;
+  [key: string]: any; // Allow other properties from the API
+}
+
+const cache = {
+  ipos: new Map<number, CacheEntry<IPO[]>>(),
+  details: new Map<string, CacheEntry<CompanyDetails>>(),
+};
 
 interface FinnhubIPO {
   symbol: string;
@@ -32,49 +53,102 @@ function generateUniqueId(ipo: FinnhubIPO): string {
 
 export async function fetchUpcomingIPOs(limit: number = 25): Promise<IPO[]> {
   try {
-    const response = await fetch(
-      `https://finnhub.io/api/v1/calendar/ipo?token=${FINNHUB_API_KEY}`
-    );
+    // Check cache first
+    const cachedData = cache.ipos.get(limit);
+    if (cachedData && Date.now() - cachedData.timestamp < CACHE_DURATION) {
+      return cachedData.data;
+    }
+
+    const response = await fetch('/api/finnhub?endpoint=/calendar/ipo');
+    if (!response.ok) {
+      throw new Error('Failed to fetch IPO data');
+    }
+
     const data = (await response.json()) as FinnhubIPOResponse;
 
+    if (!data || !data.ipoCalendar) {
+      console.warn('No IPO data received from API');
+      return [];
+    }
+
     // Sort by date before limiting
-    const sortedIpos = (data.ipoCalendar || []).sort((a, b) => {
-      return new Date(a.date).getTime() - new Date(b.date).getTime();
-    });
+    const sortedIpos = data.ipoCalendar
+      .filter((ipo) => ipo.name && ipo.date) // Filter out invalid entries
+      .sort((a, b) => {
+        return new Date(a.date).getTime() - new Date(b.date).getTime();
+      });
 
     // Apply limit
     const limitedIpos = sortedIpos.slice(0, limit);
 
-    return limitedIpos.map((ipo: FinnhubIPO) => {
-      // Calculate estimated valuation safely
-      const shares = ipo.shares || 0;
-      const price = ipo.price || 0;
-      const valuation = shares * price;
+    // Process IPOs in batches to avoid too many parallel requests
+    const batchSize = 5;
+    const processedIpos: IPO[] = [];
 
-      return {
-        id: generateUniqueId(ipo),
-        name: ipo.name
-          ? `${ipo.name} (${ipo.symbol || 'N/A'})`
-          : 'Unknown Company',
-        date: new Date(ipo.date).toLocaleDateString('en-US', {
-          month: 'short',
-          day: 'numeric',
-          year: 'numeric',
-        }),
-        status: getIPOStatus(new Date(ipo.date)),
-        valuation: formatMarketCap(valuation),
-        sector: ipo.industry || 'N/A',
-        exchange: ipo.exchange || 'N/A',
-        change: '+0%',
-        isPositive: true,
-        interest: getInterestLevel(valuation),
-        highlights: [
-          shares ? `${shares.toLocaleString()} Shares` : 'Shares TBA',
-          price ? `$${price} Price` : 'Price TBA',
-          ipo.industry || 'Industry N/A',
-        ],
-      };
+    for (let i = 0; i < limitedIpos.length; i += batchSize) {
+      const batch = limitedIpos.slice(i, i + batchSize);
+      const batchResults = await Promise.all(
+        batch.map(async (ipo: FinnhubIPO) => {
+          try {
+            // Calculate estimated valuation safely
+            const shares = ipo.shares || 0;
+            const price = ipo.price || 0;
+            const valuation = shares * price;
+
+            // Fetch company details for logo
+            const symbol = ipo.symbol || '';
+            let logo = DEFAULT_LOGO; // Set default logo
+
+            if (symbol) {
+              const details = await fetchIPODetails(symbol);
+              if (details?.logo) {
+                logo = details.logo;
+              }
+            }
+
+            const processedIpo: IPO = {
+              id: generateUniqueId(ipo),
+              name: ipo.name
+                ? `${ipo.name} (${ipo.symbol || 'N/A'})`
+                : 'Unknown Company',
+              date: new Date(ipo.date).toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric',
+              }),
+              status: getIPOStatus(new Date(ipo.date)),
+              valuation: formatMarketCap(valuation),
+              sector: ipo.industry || 'N/A',
+              exchange: ipo.exchange || 'N/A',
+              change: '+0%',
+              isPositive: true,
+              interest: getInterestLevel(valuation),
+              highlights: [
+                shares ? `${shares.toLocaleString()} Shares` : 'Shares TBA',
+                price ? `$${price} Price` : 'Price TBA',
+                ipo.industry || 'Industry N/A',
+              ],
+              logo,
+            };
+
+            return processedIpo;
+          } catch (error) {
+            console.error('Error processing IPO entry:', error);
+            return null;
+          }
+        })
+      );
+
+      processedIpos.push(...(batchResults.filter(Boolean) as IPO[]));
+    }
+
+    // Update cache
+    cache.ipos.set(limit, {
+      data: processedIpos,
+      timestamp: Date.now(),
     });
+
+    return processedIpos;
   } catch (error) {
     console.error('Error fetching IPO data:', error);
     return [];
@@ -120,29 +194,43 @@ function getInterestLevel(marketCap: number): string {
   return 'Low';
 }
 
-interface CompanyProfile {
-  country: string;
-  currency: string;
-  exchange: string;
-  ipo: string;
-  marketCapitalization: number;
-  name: string;
-  phone: string;
-  shareOutstanding: number;
-  ticker: string;
-  weburl: string;
-  logo: string;
-  finnhubIndustry: string;
-}
-
 export async function fetchIPODetails(
   symbol: string
-): Promise<CompanyProfile | null> {
+): Promise<CompanyDetails | null> {
+  if (!symbol) return null;
+
   try {
+    // Check cache first
+    const cachedData = cache.details.get(symbol);
+    if (cachedData && Date.now() - cachedData.timestamp < CACHE_DURATION) {
+      return cachedData.data;
+    }
+
     const response = await fetch(
-      `https://finnhub.io/api/v1/stock/profile2?symbol=${symbol}&token=${FINNHUB_API_KEY}`
+      `/api/finnhub?endpoint=/stock/profile2&symbol=${symbol}`
     );
-    const data = (await response.json()) as CompanyProfile;
+    if (!response.ok) {
+      throw new Error('Failed to fetch IPO details');
+    }
+
+    const data = (await response.json()) as CompanyDetails;
+
+    if (!data) {
+      console.warn('No details data received for symbol:', symbol);
+      return null;
+    }
+
+    // Set default logo if none provided or if URL is invalid
+    if (!data.logo) {
+      data.logo = DEFAULT_LOGO;
+    }
+
+    // Update cache
+    cache.details.set(symbol, {
+      data,
+      timestamp: Date.now(),
+    });
+
     return data;
   } catch (error) {
     console.error('Error fetching IPO details:', error);

@@ -11,6 +11,12 @@ import { WatchlistProvider } from '@/context/watchlist-context';
 export default function IPOListings() {
   const [selectedMetric, setSelectedMetric] = useState<string | null>(null);
   const [selectedDate, setSelectedDate] = useState<number | null>(null);
+  const [ipos, setIpos] = useState<any[]>([]);
+
+  // This function will be passed to IPOList to update the shared IPO data
+  const handleIPOsLoaded = (loadedIpos: any[]) => {
+    setIpos(loadedIpos);
+  };
 
   return (
     <WatchlistProvider>
@@ -29,12 +35,13 @@ export default function IPOListings() {
 
               <div className="grid lg:grid-cols-5 gap-8">
                 <div className="lg:col-span-3">
-                  <IPOList />
+                  <IPOList onIPOsLoaded={handleIPOsLoaded} />
                 </div>
                 <div className="lg:col-span-2 space-y-6 lg:sticky lg:top-8">
                   <IPOCalendar
                     selectedDate={selectedDate}
                     onDateSelect={setSelectedDate}
+                    ipos={ipos}
                   />
                   <Watchlist />
                 </div>

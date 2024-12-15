@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Search, SlidersHorizontal } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -24,24 +24,53 @@ import {
 } from '@/components/ui/popover';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
+import { useDebounce } from '@/hooks/use-debounce';
 
 export type IPO = Omit<WatchedIPO, 'isFavorite'> & {
   highlights: string[];
   interest: string;
   status: string;
+  logo?: string;
 };
 
 type SortOption = 'date' | 'name' | 'valuation';
 
+interface IPOListProps {
+  onIPOsLoaded?: (ipos: IPO[]) => void;
+}
+
+type FilterKey = 'searchQuery' | 'sector' | 'exchange' | 'sortBy' | 'limit';
+
+type FilterValue = string | number | SortOption;
+
+interface Filters {
+  searchQuery: string;
+  sector: string;
+  exchange: string;
+  sortBy: SortOption;
+  limit: number;
+}
+
+// Move parsing functions outside component and memoize results
+const dateCache = new Map<string, number>();
 function parseDate(dateStr: string): number {
+  if (dateCache.has(dateStr)) {
+    return dateCache.get(dateStr)!;
+  }
   try {
-    return new Date(dateStr).getTime();
-  } catch (error) {
+    const timestamp = new Date(dateStr).getTime();
+    dateCache.set(dateStr, timestamp);
+    return timestamp;
+  } catch {
     return 0;
   }
 }
 
+const valuationCache = new Map<string, number>();
 function parseValuation(val: string): number {
+  if (valuationCache.has(val)) {
+    return valuationCache.get(val)!;
+  }
   try {
     const numStr = val.replace(/[^0-9.]/g, '');
     const multiplier = val.includes('T')
@@ -51,88 +80,135 @@ function parseValuation(val: string): number {
       : val.includes('M')
       ? 1e6
       : 1;
-    return parseFloat(numStr) * multiplier;
+    const result = parseFloat(numStr) * multiplier;
+    valuationCache.set(val, result);
+    return result;
   } catch {
     return 0;
   }
 }
 
-export function IPOList() {
+// Add minimum loading time constant
+const MIN_LOADING_TIME = 750; // Increased to 750ms for smoother transitions
+
+export function IPOList({ onIPOsLoaded }: IPOListProps) {
   const { isWatched, addToWatchlist, removeFromWatchlist } = useWatchlist();
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedSector, setSelectedSector] = useState('all');
-  const [selectedExchange, setSelectedExchange] = useState('all');
-  const [sortBy, setSortBy] = useState<SortOption>('date');
+  const [filters, setFilters] = useState<Filters>({
+    searchQuery: '',
+    sector: 'all',
+    exchange: 'all',
+    sortBy: 'date',
+    limit: 25,
+  });
   const [loading, setLoading] = useState(true);
   const [ipos, setIpos] = useState<IPO[]>([]);
   const [sectors, setSectors] = useState<string[]>([]);
   const [exchanges, setExchanges] = useState<string[]>([]);
-  const [limit, setLimit] = useState<number>(25);
   const { toast } = useToast();
 
+  // Debounce only the search query and limit
+  const debouncedSearchQuery = useDebounce(filters.searchQuery, 300);
+  const debouncedLimit = useDebounce(filters.limit, 500);
+
+  // Memoize the API call function
   const loadIPOs = useCallback(async () => {
+    const startTime = Date.now();
     try {
-      const data = await fetchUpcomingIPOs(limit);
-      setIpos(data);
+      const data = await fetchUpcomingIPOs(debouncedLimit);
 
-      const uniqueSectors = [
-        ...new Set(data.map((ipo) => ipo.sector).filter(Boolean)),
-      ];
-      const uniqueExchanges = [
-        ...new Set(data.map((ipo) => ipo.exchange).filter(Boolean)),
-      ];
+      if (!data || data.length === 0) {
+        setIpos([]);
+      } else {
+        // Process metadata first
+        const uniqueSectors = Array.from(
+          new Set(data.map((ipo) => ipo.sector).filter(Boolean))
+        );
+        const uniqueExchanges = Array.from(
+          new Set(data.map((ipo) => ipo.exchange).filter(Boolean))
+        );
 
-      setSectors(uniqueSectors);
-      setExchanges(uniqueExchanges);
-      setLoading(false);
+        // Batch state updates
+        requestAnimationFrame(() => {
+          setSectors(uniqueSectors);
+          setExchanges(uniqueExchanges);
+          setIpos(data);
+          onIPOsLoaded?.(data);
+        });
+      }
     } catch (error) {
+      console.error('Error loading IPOs:', error);
       toast({
         title: 'Error loading IPOs',
         description: 'Please try again later.',
         variant: 'destructive',
       });
+    } finally {
+      // Ensure minimum loading time
+      const elapsed = Date.now() - startTime;
+      if (elapsed < MIN_LOADING_TIME) {
+        await new Promise((resolve) =>
+          setTimeout(resolve, MIN_LOADING_TIME - elapsed)
+        );
+      }
       setLoading(false);
     }
-  }, [limit, toast]);
+  }, [debouncedLimit, toast, onIPOsLoaded]);
 
+  // Load IPOs on mount and when limit changes
   useEffect(() => {
     let mounted = true;
 
-    const fetchData = async () => {
+    const load = async () => {
       if (!mounted) return;
-      setLoading(true);
+      // Don't set loading true if we already have data
+      if (ipos.length === 0) {
+        setLoading(true);
+      }
       await loadIPOs();
     };
 
-    fetchData();
+    load();
+
     return () => {
       mounted = false;
     };
-  }, [loadIPOs]);
+  }, [loadIPOs, ipos.length]);
 
-  const handleLimitChange = useCallback((value: number[]) => {
-    setLimit(value[0]);
-  }, []);
+  // Handlers for filter changes
+  const handleFilterChange = useCallback(
+    <K extends FilterKey>(key: K, value: Filters[K]) => {
+      setFilters((prev) => ({ ...prev, [key]: value }));
+    },
+    []
+  );
 
-  const handleSearch = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value);
-  }, []);
+  // Memoize filtered and sorted IPOs
+  const filteredIpos = useMemo(() => {
+    if (!ipos.length) return [];
 
-  const filteredIpos = ipos
-    .filter((ipo) => {
-      const searchTerms = searchQuery.toLowerCase().split(' ');
-      const ipoText =
-        `${ipo.name} ${ipo.sector} ${ipo.exchange} ${ipo.status}`.toLowerCase();
+    // Create search terms array once
+    const searchTerms = debouncedSearchQuery.toLowerCase().split(' ');
+    const { sector, exchange, sortBy } = filters;
 
-      const matchesSearch = searchTerms.every((term) => ipoText.includes(term));
-      const matchesSector =
-        selectedSector === 'all' || ipo.sector === selectedSector;
-      const matchesExchange =
-        selectedExchange === 'all' || ipo.exchange === selectedExchange;
+    // First filter
+    const filtered = ipos.filter((ipo) => {
+      // Only create ipoText if there are search terms
+      if (searchTerms.length > 0) {
+        const ipoText =
+          `${ipo.name} ${ipo.sector} ${ipo.exchange} ${ipo.status}`.toLowerCase();
+        if (!searchTerms.every((term: string) => ipoText.includes(term))) {
+          return false;
+        }
+      }
 
-      return matchesSearch && matchesSector && matchesExchange;
-    })
-    .sort((a, b) => {
+      return (
+        (sector === 'all' || ipo.sector === sector) &&
+        (exchange === 'all' || ipo.exchange === exchange)
+      );
+    });
+
+    // Then sort
+    return filtered.sort((a, b) => {
       switch (sortBy) {
         case 'name':
           return (a.name || '').localeCompare(b.name || '');
@@ -143,6 +219,7 @@ export function IPOList() {
           return parseDate(a.date) - parseDate(b.date);
       }
     });
+  }, [ipos, debouncedSearchQuery, filters]);
 
   return (
     <div className="space-y-8">
@@ -153,12 +230,17 @@ export function IPOList() {
             <Search className="absolute left-2 top-3 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Search by name, sector, exchange..."
-              value={searchQuery}
-              onChange={handleSearch}
+              value={filters.searchQuery}
+              onChange={(e) =>
+                handleFilterChange('searchQuery', e.target.value)
+              }
               className="pl-8"
             />
           </div>
-          <Select value={selectedSector} onValueChange={setSelectedSector}>
+          <Select
+            value={filters.sector}
+            onValueChange={(value) => handleFilterChange('sector', value)}
+          >
             <SelectTrigger>
               <SelectValue placeholder="Filter by Sector" />
             </SelectTrigger>
@@ -171,7 +253,10 @@ export function IPOList() {
               ))}
             </SelectContent>
           </Select>
-          <Select value={selectedExchange} onValueChange={setSelectedExchange}>
+          <Select
+            value={filters.exchange}
+            onValueChange={(value) => handleFilterChange('exchange', value)}
+          >
             <SelectTrigger>
               <SelectValue placeholder="Filter by Exchange" />
             </SelectTrigger>
@@ -185,7 +270,12 @@ export function IPOList() {
             </SelectContent>
           </Select>
           <div className="flex gap-2">
-            <Select value={sortBy} onValueChange={setSortBy}>
+            <Select
+              value={filters.sortBy}
+              onValueChange={(value: SortOption) =>
+                handleFilterChange('sortBy', value)
+              }
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Sort by" />
               </SelectTrigger>
@@ -206,7 +296,7 @@ export function IPOList() {
                   <div className="space-y-2">
                     <h4 className="font-medium leading-none">Display Limit</h4>
                     <p className="text-sm text-muted-foreground">
-                      Show up to {limit} IPOs at once
+                      Show up to {filters.limit} IPOs at once
                     </p>
                   </div>
                   <div className="grid gap-2">
@@ -217,8 +307,10 @@ export function IPOList() {
                         max={100}
                         min={5}
                         step={5}
-                        value={[limit]}
-                        onValueChange={handleLimitChange}
+                        value={[filters.limit]}
+                        onValueChange={(value) =>
+                          handleFilterChange('limit', value[0])
+                        }
                         className="col-span-2"
                       />
                     </div>
@@ -230,36 +322,48 @@ export function IPOList() {
         </div>
         <div className="mt-4 flex justify-between text-sm text-muted-foreground">
           <p>Showing {filteredIpos.length} results</p>
-          <p>Display limit: {limit} IPOs</p>
+          <p>Display limit: {filters.limit} IPOs</p>
         </div>
       </Card>
 
-      {/* IPO List */}
+      {/* IPO List with fade transition */}
       <div className="space-y-4">
-        {loading ? (
-          Array.from({ length: Math.min(3, limit) }).map((_, i) => (
-            <Card key={i} className="p-4">
-              <Skeleton className="h-24 w-full" />
-            </Card>
-          ))
-        ) : filteredIpos.length > 0 ? (
-          filteredIpos.map((ipo) => (
-            <IPOCard
-              key={ipo.id}
-              ipo={ipo}
-              isWatched={isWatched(ipo.id)}
-              onToggleWatch={(watched) =>
-                watched ? addToWatchlist(ipo) : removeFromWatchlist(ipo.id)
-              }
-            />
-          ))
-        ) : (
-          <div className="text-center py-8">
-            <p className="text-lg text-muted-foreground">
-              No IPOs found matching your criteria
-            </p>
-          </div>
-        )}
+        <div
+          className={`transition-opacity duration-300 ease-in-out ${
+            loading ? 'opacity-50' : 'opacity-100'
+          }`}
+        >
+          {loading && ipos.length === 0 ? (
+            <div className="space-y-4">
+              {Array.from({ length: Math.min(3, filters.limit) }).map(
+                (_, i) => (
+                  <Card key={i} className="p-4">
+                    <Skeleton className="h-24 w-full" />
+                  </Card>
+                )
+              )}
+            </div>
+          ) : filteredIpos.length > 0 ? (
+            <div className="space-y-4">
+              {filteredIpos.map((ipo) => (
+                <IPOCard
+                  key={ipo.id}
+                  ipo={ipo}
+                  isWatched={isWatched(ipo.id)}
+                  onToggleWatch={(watched) =>
+                    watched ? addToWatchlist(ipo) : removeFromWatchlist(ipo.id)
+                  }
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8">
+              <p className="text-lg text-muted-foreground">
+                No IPOs found matching your criteria
+              </p>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
