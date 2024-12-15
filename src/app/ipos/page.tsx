@@ -4,11 +4,11 @@ import { useState } from 'react';
 import { MarketMetrics } from '@/components/ipo/market-metrics';
 import { IPOCalendar } from '@/components/ipo/calendar';
 import { IPOList } from '@/components/ipo/ipo-list';
-import { Watchlist } from '@/components/ipo/watchlist';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { WatchlistProvider } from '@/context/watchlist-context';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { IPO } from '@/types/ipo';
+import { Sidebar } from '@/components/ipo/sidebar';
 
 export default function IPOListings() {
   const [selectedMetric, setSelectedMetric] = useState<string | null>(null);
@@ -70,9 +70,9 @@ export default function IPOListings() {
                 </div>
 
                 {/* Right Column - Sidebar */}
-                <div className="lg:col-span-2 space-y-6">
-                  <div className="lg:sticky lg:top-8 space-y-6">
-                    <Watchlist />
+                <div className="lg:col-span-2">
+                  <div className="lg:sticky lg:top-8">
+                    <Sidebar />
                   </div>
                 </div>
               </div>
