@@ -66,7 +66,7 @@ const footerLinks: FooterLinks = {
 
 export function Footer() {
   return (
-    <footer className="w-full bg-[#0B1120] text-slate-400">
+    <footer className="w-full bg-gradient-to-t from-transparent via-brand/[0.02] to-brand/[0.04] text-muted-foreground">
       <div className="max-w-[1280px] mx-auto px-4 py-16">
         {/* Main Footer Links */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8 lg:gap-12 mb-16">

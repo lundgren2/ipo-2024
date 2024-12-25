@@ -70,7 +70,7 @@ export function NewsSection() {
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/20 rounded-xl" />
                   <div className="absolute bottom-0 p-6">
                     <div className="flex items-center gap-3 mb-3">
-                      <span className="inline-block px-2.5 py-1 text-xs font-medium bg-primary text-white rounded">
+                      <span className="inline-block px-1.5 font-bold py-1 text-xs bg-brand/10 text-brand rounded">
                         {featuredNews.tag}
                       </span>
                       <span className="text-sm text-slate-200">
@@ -109,16 +109,13 @@ export function NewsSection() {
                         <span className="inline-block px-2 py-0.5 text-[10px] font-medium text-primary bg-primary/10 rounded">
                           {item.tag}
                         </span>
-                        <span className="text-xs text-muted-foreground">
-                          {item.date}
-                        </span>
                       </div>
-                      <h3 className="font-medium text-sm line-clamp-2 mb-1">
+                      <h3 className="text-lg font-semibold line-clamp-2 mb-1">
                         {item.title}
                       </h3>
-                      <p className="text-xs text-muted-foreground line-clamp-2">
-                        {item.description}
-                      </p>
+                      <span className="text-xs text-muted-foreground">
+                        {item.date}
+                      </span>
                     </div>
                   </div>
                 </Card>

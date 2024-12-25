@@ -20,11 +20,15 @@ export function NewsletterSection() {
   };
 
   return (
-    <section className="w-full py-16 bg-gradient-to-b from-transparent to-primary/5">
+    <section className="w-full py-16 bg-gradient-to-b from-transparent via-brand/[0.02] to-brand/[0.04]">
       <div className="container max-w-4xl mx-auto px-4 text-center">
         <div className="flex items-center justify-center mb-4">
-          <Bell className="w-5 h-5 text-primary mr-2" />
-          <h2 className="text-lg font-semibold">Stay Updated on IPO Markets</h2>
+          <div className="p-2 rounded-full bg-brand/[0.08] ring-1 ring-brand/[0.12]">
+            <Bell className="w-5 h-5 text-brand" />
+          </div>
+          <h2 className="text-lg font-semibold ml-3">
+            Stay Updated on IPO Markets
+          </h2>
         </div>
         <p className="text-muted-foreground mb-8 max-w-2xl mx-auto">
           Get exclusive insights on upcoming IPOs, market analysis, and breaking

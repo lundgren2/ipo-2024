@@ -132,7 +132,7 @@ export function RecentIPOsSection() {
                     <div>
                       <div className="flex items-start justify-between mb-4">
                         <div className="flex items-center gap-4">
-                          <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-white dark:bg-slate-800 border dark:border-slate-700">
+                          <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-white dark:bg-accent/50 border dark:border-slate-700">
                             <Image
                               src={ipo.logo}
                               alt={`${ipo.name} logo`}
@@ -241,7 +241,7 @@ export function RecentIPOsSection() {
             {listedIPOs.map((ipo) => (
               <Link href={`/ipo/${ipo.ticker.toLowerCase()}`} key={ipo.ticker}>
                 <Card className="p-4 flex items-center gap-6 hover:bg-accent/50 transition-colors">
-                  <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-white dark:bg-slate-800 border dark:border-slate-700">
+                  <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-white dark:bg-accent border dark:border-accent">
                     <Image
                       src={ipo.logo}
                       alt={`${ipo.name} logo`}
