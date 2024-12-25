@@ -9,7 +9,17 @@ import {
   SiInstagram as Instagram,
 } from '@icons-pack/react-simple-icons';
 
-const footerLinks = {
+interface FooterLink {
+  name: string;
+  href: string;
+  badge?: string;
+}
+
+interface FooterLinks {
+  [category: string]: FooterLink[];
+}
+
+const footerLinks: FooterLinks = {
   PRODUCT: [
     { name: 'IPO Calendar', href: '/calendar' },
     { name: 'Market Analysis', href: '/analysis' },
@@ -66,18 +76,18 @@ export function Footer() {
                 {category}
               </h3>
               <ul className="space-y-3">
-                {links.map((link) => (
+                {links.map((link: FooterLink) => (
                   <li key={link.name}>
                     <Link
                       href={link.href}
                       className="hover:text-white transition-colors text-[13px] inline-flex items-center gap-2"
                     >
                       {link.name}
-                      {link.badge && (
+                      {link.badge ? (
                         <span className="text-[10px] font-medium bg-primary/10 text-primary px-1.5 py-0.5 rounded">
                           {link.badge}
                         </span>
-                      )}
+                      ) : null}
                     </Link>
                   </li>
                 ))}

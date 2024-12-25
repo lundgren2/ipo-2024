@@ -108,26 +108,27 @@ export function parseDate(dateStr: string): number {
   }
 }
 
-export function parseValuation(val: string): number {
+export function parseValuation(val: string | number): number {
+  if (typeof val === 'number') return val;
   if (!val) return 0;
 
-  const cached = valuationCache.get(val);
+  const cached = valuationCache.get(String(val));
   if (cached !== null) return cached;
 
   try {
-    const numStr = val.replace(/[^0-9.]/g, '');
-    const multiplier = val.includes('T')
+    const numStr = String(val).replace(/[^0-9.]/g, '');
+    const multiplier = String(val).includes('T')
       ? 1e12
-      : val.includes('B')
+      : String(val).includes('B')
       ? 1e9
-      : val.includes('M')
+      : String(val).includes('M')
       ? 1e6
       : 1;
 
     const result = parseFloat(numStr) * multiplier;
     if (isNaN(result)) throw new Error('Invalid number');
 
-    valuationCache.set(val, result);
+    valuationCache.set(String(val), result);
     return result;
   } catch (error) {
     console.warn(`Failed to parse valuation: ${val}`, error);
@@ -219,7 +220,9 @@ class APICache {
 const cache = new APICache();
 
 // Helper functions for IPO status and interest level
-function getIPOStatus(date: Date): string {
+function getIPOStatus(
+  date: Date
+): 'Next Week' | 'Completed' | 'Filing' | undefined {
   const now = new Date();
   const diffDays = Math.ceil(
     (date.getTime() - now.getTime()) / (1000 * 3600 * 24)
@@ -227,16 +230,15 @@ function getIPOStatus(date: Date): string {
 
   if (diffDays < 0) return 'Completed';
   if (diffDays < 7) return 'Next Week';
-  if (diffDays < 14) return 'Coming Soon';
-  return 'Scheduled';
+  return 'Filing';
 }
 
-function getInterestLevel(marketCap: number): string {
-  if (!marketCap || isNaN(marketCap)) return 'TBA';
-  if (marketCap >= 10e9) return 'Very High';
-  if (marketCap >= 5e9) return 'High';
-  if (marketCap >= 1e9) return 'Moderate';
-  return 'Low';
+function getInterestLevel(marketCap: number): number {
+  if (!marketCap || isNaN(marketCap)) return 0;
+  if (marketCap >= 10e9) return 100;
+  if (marketCap >= 5e9) return 75;
+  if (marketCap >= 1e9) return 50;
+  return 25;
 }
 
 // Helper function to try different identifiers
@@ -458,14 +460,12 @@ async function processIPO(ipo: FinnhubIPO): Promise<IPO | null> {
       year: 'numeric',
     }).format(ipoDate);
 
-    return {
-      id: generateUniqueId(ipo),
-      name: ipo.name
-        ? `${ipo.name} (${ipo.symbol || 'N/A'})`
-        : 'Unknown Company',
+    const transformedIPO: IPO = {
+      id: ipo.symbol,
+      name: details?.name || ipo.name || 'Unknown Company',
       date: formattedDate,
       status: getIPOStatus(ipoDate),
-      valuation: formatMarketCap(valuation),
+      valuation: parseValuation(valuation),
       sector:
         details?.finnhubIndustry || ipo.industry || CONFIG.DEFAULTS.INDUSTRY,
       exchange: details?.exchange || ipo.exchange || CONFIG.DEFAULTS.EXCHANGE,
@@ -524,4 +524,32 @@ export function cleanup(): void {
   valuationCache.destroy();
   ipoCache.destroy();
   detailsCache.destroy();
+}
+
+function transformIPO(ipo: FinnhubIPO, details?: CompanyDetails | null): IPO {
+  const ipoDate = new Date(ipo.date);
+  const formattedDate = ipoDate.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
+
+  const parsedValuation = parseValuation(details?.marketCapitalization || 0);
+
+  return {
+    id: ipo.symbol,
+    name: details?.name || ipo.name || 'Unknown Company',
+    date: formattedDate,
+    status: getIPOStatus(ipoDate),
+    valuation: parsedValuation,
+    sector:
+      details?.finnhubIndustry || ipo.industry || CONFIG.DEFAULTS.INDUSTRY,
+    exchange: details?.exchange || ipo.exchange || CONFIG.DEFAULTS.EXCHANGE,
+    change: '+0%', // TODO: Implement real change calculation
+    isPositive: true,
+    interest: getInterestLevel(parsedValuation),
+    highlights: generateHighlights(ipo, details, parsedValuation),
+    logo: details?.logo || CONFIG.DEFAULTS.LOGO,
+    companyDetails: details || undefined,
+  };
 }
