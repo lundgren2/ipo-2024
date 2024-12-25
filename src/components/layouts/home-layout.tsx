@@ -15,12 +15,12 @@ export function HomeLayout({ initialNews }: HomeLayoutProps) {
   return (
     <div className="min-h-screen bg-background">
       <BreakingNews />
-      <HeroSection />
-      <FeaturedIPO />
-      <SecondarySections />
       <Suspense fallback={<NewsLoadingSkeleton />}>
         <NewsSection initialNews={initialNews} />
       </Suspense>
+      <HeroSection />
+      <FeaturedIPO />
+      <SecondarySections />
     </div>
   );
 }
