@@ -1,14 +1,28 @@
 import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
-  // add images.unsplash.com to the image domains
   images: {
-    domains: [
-      'images.unsplash.com',
-      'logo.clearbit.com',
-      'flagcdn.com',
-      'api.dicebear.com',
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'logo.clearbit.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'flagcdn.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'api.dicebear.com',
+      },
     ],
+  },
+  experimental: {
+    optimizeCss: true,
   },
 };
 
