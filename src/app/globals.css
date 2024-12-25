@@ -91,6 +91,17 @@ body {
   .animate-ping-once {
     animation: ping-once 0.3s cubic-bezier(0, 0, 0.2, 1);
   }
+
+  /* Hide scrollbar for Chrome, Safari and Opera */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Hide scrollbar for IE, Edge and Firefox */
+  .no-scrollbar {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+  }
 }
 
 /* Markdown Content Styles */

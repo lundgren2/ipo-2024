@@ -104,31 +104,41 @@ export function Footer() {
           <div className="flex items-center gap-6">
             <Link
               href="https://twitter.com"
-              className="hover:text-white transition-colors"
+              className="hover:text-foreground transition-colors"
+              target="_blank"
+              rel="noopener noreferrer"
             >
               <X size={18} />
             </Link>
             <Link
               href="https://youtube.com"
-              className="hover:text-white transition-colors"
+              className="hover:text-foreground transition-colors"
+              target="_blank"
+              rel="noopener noreferrer"
             >
               <Youtube size={18} />
             </Link>
             <Link
               href="https://linkedin.com"
-              className="hover:text-white transition-colors"
+              className="hover:text-foreground transition-colors"
+              target="_blank"
+              rel="noopener noreferrer"
             >
               <Linkedin size={18} />
             </Link>
             <Link
               href="https://facebook.com"
-              className="hover:text-white transition-colors"
+              className="hover:text-foreground transition-colors"
+              target="_blank"
+              rel="noopener noreferrer"
             >
               <Facebook size={18} />
             </Link>
             <Link
               href="https://instagram.com"
-              className="hover:text-white transition-colors"
+              className="hover:text-foreground transition-colors"
+              target="_blank"
+              rel="noopener noreferrer"
             >
               <Instagram size={18} />
             </Link>

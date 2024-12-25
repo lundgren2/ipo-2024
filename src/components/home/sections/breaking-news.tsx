@@ -110,7 +110,7 @@ export function BreakingNews() {
       <div className="max-w-full mx-auto px-4 py-2">
         <div
           ref={scrollRef}
-          className="flex overflow-x-auto gap-8 scrollbar-hide"
+          className="flex overflow-x-auto gap-8 no-scrollbar"
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
           onMouseEnter={() => (scrolling.current = false)}
           onMouseLeave={() => (scrolling.current = true)}
