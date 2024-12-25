@@ -17,7 +17,7 @@ import { useWatchlist } from '@/context/watchlist-context';
 import {
   fetchUpcomingIPOs,
   parseDate,
-  parseValuation,
+  // parseValuation,
 } from '@/services/ipo-service';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
@@ -49,7 +49,18 @@ interface Filters {
 }
 
 // Add minimum loading time constant
-const MIN_LOADING_TIME = 750; // Increased to 750ms for smoother transitions
+const MIN_LOADING_TIME = 250;
+
+// Add this near the top of the file, after imports
+const exchanges = [
+  'NYSE',
+  'NASDAQ',
+  'AMEX',
+  'LSE',
+  'TSX',
+  'ASX',
+  'JSE',
+] as const;
 
 export function IPOList({ onIPOsLoaded }: IPOListProps) {
   const { isWatched, addToWatchlist, removeFromWatchlist } = useWatchlist();
@@ -62,8 +73,8 @@ export function IPOList({ onIPOsLoaded }: IPOListProps) {
   });
   const [loading, setLoading] = useState(true);
   const [ipos, setIpos] = useState<IPO[]>([]);
-  const [sectors, setSectors] = useState<string[]>([]);
-  const [exchanges, setExchanges] = useState<string[]>([]);
+  // const [sectors, setSectors] = useState<string[]>([]);
+  // const [exchanges, setExchanges] = useState<string[]>([]);
   const { toast } = useToast();
 
   // Debounce only the search query and limit
@@ -79,18 +90,18 @@ export function IPOList({ onIPOsLoaded }: IPOListProps) {
       if (!data || data.length === 0) {
         setIpos([]);
       } else {
-        // Process metadata first
-        const uniqueSectors = Array.from(
-          new Set(data.map((ipo) => ipo.sector).filter(Boolean))
-        );
-        const uniqueExchanges = Array.from(
-          new Set(data.map((ipo) => ipo.exchange).filter(Boolean))
-        );
+        // // Process metadata first
+        // const uniqueSectors = Array.from(
+        //   new Set(data.map((ipo) => ipo.sector).filter(Boolean))
+        // );
+        // const uniqueExchanges = Array.from(
+        //   new Set(data.map((ipo) => ipo.exchange).filter(Boolean))
+        // );
 
         // Batch state updates
         requestAnimationFrame(() => {
-          setSectors(uniqueSectors);
-          setExchanges(uniqueExchanges);
+          // setSectors(uniqueSectors);
+          // setExchanges(uniqueExchanges);
           setIpos(data);
           onIPOsLoaded?.(data);
         });
@@ -172,9 +183,9 @@ export function IPOList({ onIPOsLoaded }: IPOListProps) {
       switch (sortBy) {
         case 'name':
           return (a.name || '').localeCompare(b.name || '');
-        case 'valuation':
-          return parseValuation(b.valuation) - parseValuation(a.valuation);
-        case 'date':
+        // case 'valuation':
+        //   return parseValuation(b.valuation) - parseValuation(a.valuation);
+        // case 'date':
         default:
           return parseDate(a.date) - parseDate(b.date);
       }
@@ -243,11 +254,11 @@ export function IPOList({ onIPOsLoaded }: IPOListProps) {
                           </SelectTrigger>
                           <SelectContent>
                             <SelectItem value="all">All Sectors</SelectItem>
-                            {sectors.map((sector) => (
+                            {/* {sectors.map((sector) => (
                               <SelectItem key={sector} value={sector}>
                                 {sector}
                               </SelectItem>
-                            ))}
+                            ))} */}
                           </SelectContent>
                         </Select>
                       </div>
@@ -259,8 +270,8 @@ export function IPOList({ onIPOsLoaded }: IPOListProps) {
                             handleFilterChange('exchange', value)
                           }
                         >
-                          <SelectTrigger>
-                            <SelectValue placeholder="All Exchanges" />
+                          <SelectTrigger className="w-[180px]">
+                            <SelectValue placeholder="Select Exchange" />
                           </SelectTrigger>
                           <SelectContent>
                             <SelectItem value="all">All Exchanges</SelectItem>

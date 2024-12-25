@@ -16,6 +16,7 @@ export type MarketMetric = {
 interface MarketMetricsProps {
   onMetricSelect?: (metric: string) => void;
   selectedMetric?: string | null;
+  className?: string;
 }
 
 export function MarketMetrics({

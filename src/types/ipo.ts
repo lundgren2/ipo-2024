@@ -31,15 +31,10 @@ export interface IPO {
   id: string;
   name: string;
   date: string;
-  status: string;
-  valuation: string;
-  sector: string;
-  exchange: string;
   change: string;
   isPositive: boolean;
-  interest: string;
-  highlights: string[];
-  logo: string;
+  isFavorite?: boolean;
+  status?: 'Next Week' | 'Completed' | 'Filing';
   // Additional company details
   companyDetails?: CompanyDetails;
   // Raw data
@@ -47,7 +42,19 @@ export interface IPO {
   price?: number;
   symbol?: string;
   isin?: string;
+  exchange?: string;
+  sector?: string;
+  valuation?: number;
+  interest?: number;
+  trend?: number;
+  marketSentiment?: number;
+  totalVolume?: number;
+  averageReturn?: number;
+  successRate?: number;
+
   cusip?: string;
+  logo?: string; // TODO: this is not populated?
+  highlights?: string[];
 }
 
 export interface FinnhubIPO {
@@ -71,4 +78,12 @@ export interface IPOPerformanceData {
   successRate: string;
   totalVolume: string;
   marketSentiment: string;
+}
+
+export interface WatchlistContextType {
+  watchedIpos: IPO[];
+  addToWatchlist: (ipo: IPO) => void;
+  removeFromWatchlist: (id: string) => void;
+  toggleFavorite: (id: string) => void;
+  isWatched: (id: string) => boolean;
 }

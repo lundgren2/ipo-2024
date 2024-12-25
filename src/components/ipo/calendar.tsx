@@ -17,7 +17,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { IPO } from './ipo-list';
+import type { IPO } from '@/types/ipo';
 import { IPODetails } from './ipo-details';
 
 interface CalendarEvent {
@@ -45,7 +45,6 @@ export function IPOCalendar({
   onDateSelect,
   ipos = [],
 }: IPOCalendarProps) {
-  const [currentMonth, setCurrentMonth] = useState(new Date());
   const [calendarEvents, setCalendarEvents] = useState<
     Record<number, CalendarEvent>
   >({});

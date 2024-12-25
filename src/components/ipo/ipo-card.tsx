@@ -12,6 +12,7 @@ import {
   DollarSign,
   Users,
   ArrowRight,
+  LucideIcon,
 } from 'lucide-react';
 import { IPO } from '@/types/ipo';
 import { IPODetails } from './ipo-details';
@@ -28,11 +29,18 @@ interface WatchButtonProps {
   onClick: (e: React.MouseEvent<HTMLButtonElement>) => void;
 }
 
-const statusColor = {
+const statusColor: Record<
+  string,
+  'destructive' | 'default' | 'secondary' | 'outline'
+> = {
   'Next Week': 'destructive',
-  'Coming Soon': 'warning',
+  'Coming Soon': 'default',
   Scheduled: 'default',
   Completed: 'secondary',
+  Filing: 'outline',
+  Upcoming: 'outline',
+  'Upcoming Next Week': 'outline',
+  'Upcoming Soon': 'outline',
 } as const;
 
 // Memoize the watch button to prevent unnecessary re-renders
@@ -54,6 +62,11 @@ const WatchButton = memo(function WatchButton({
     </Button>
   );
 });
+
+const formatValue = (value: string | number | undefined) => {
+  if (value === undefined) return 'N/A';
+  return value;
+};
 
 export function IPOCard({ ipo, isWatched, onToggleWatch }: IPOCardProps) {
   const [showDetails, setShowDetails] = useState(false);
@@ -94,19 +107,20 @@ export function IPOCard({ ipo, isWatched, onToggleWatch }: IPOCardProps) {
                 {ipo.name}
               </h3>
               <div className="flex flex-wrap gap-2">
-                <Badge
-                  variant="outline"
-                  className="group-hover:border-primary/30"
-                >
-                  {ipo.exchange}
-                </Badge>
-                <Badge variant="secondary">{ipo.sector}</Badge>
-                <Badge
-                  variant={statusColor[ipo.status as keyof typeof statusColor]}
-                  className="transition-all"
-                >
-                  {ipo.status}
-                </Badge>
+                {ipo.exchange && (
+                  <Badge variant="outline">{ipo.exchange}</Badge>
+                )}
+                {ipo.sector && <Badge variant="secondary">{ipo.sector}</Badge>}
+                {ipo.status && (
+                  <Badge
+                    variant={
+                      statusColor[ipo.status as keyof typeof statusColor] ??
+                      'outline'
+                    }
+                  >
+                    {ipo.status}
+                  </Badge>
+                )}
               </div>
             </div>
           </div>
@@ -115,51 +129,31 @@ export function IPOCard({ ipo, isWatched, onToggleWatch }: IPOCardProps) {
 
         {/* Metrics Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-6">
-          <div className="flex items-center gap-3 group/metric">
-            <Calendar className="h-5 w-5 text-muted-foreground group-hover/metric:text-primary transition-colors" />
-            <div>
-              <p className="text-sm text-muted-foreground">Expected Date</p>
-              <p className="font-medium group-hover/metric:text-primary transition-colors">
-                {ipo.date}
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center gap-3 group/metric">
-            <DollarSign className="h-5 w-5 text-muted-foreground group-hover/metric:text-primary transition-colors" />
-            <div>
-              <p className="text-sm text-muted-foreground">Valuation</p>
-              <p className="font-medium group-hover/metric:text-primary transition-colors">
-                {ipo.valuation}
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center gap-3 group/metric">
-            <Users className="h-5 w-5 text-muted-foreground group-hover/metric:text-primary transition-colors" />
-            <div>
-              <p className="text-sm text-muted-foreground">Interest</p>
-              <p className="font-medium group-hover/metric:text-primary transition-colors">
-                {ipo.interest}
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center gap-3 group/metric">
-            <TrendingUp className="h-5 w-5 text-muted-foreground group-hover/metric:text-primary transition-colors" />
-            <div>
-              <p className="text-sm text-muted-foreground">Trend</p>
-              <p
-                className={`font-medium ${
-                  ipo.isPositive ? 'text-green-500' : 'text-red-500'
-                }`}
-              >
-                {ipo.change}
-              </p>
-            </div>
-          </div>
+          <MetricItem
+            icon={Calendar}
+            label="Expected Date"
+            value={formatValue(ipo.date)}
+          />
+          <MetricItem
+            icon={DollarSign}
+            label="Valuation"
+            value={formatValue(ipo.valuation)}
+          />
+          <MetricItem
+            icon={Users}
+            label="Interest"
+            value={formatValue(ipo.interest)}
+          />
+          <MetricItem
+            icon={TrendingUp}
+            label="Change"
+            value={formatValue(ipo.change)}
+            isPositive={ipo.isPositive}
+          />
         </div>
-
-        {/* Highlights */}
+        {/* 
         <div className="flex flex-wrap gap-2 mb-4">
-          {ipo.highlights.map((highlight, index) => (
+          {ipo?.highlights?.map((highlight: string, index: number) => (
             <Badge
               key={index}
               variant="secondary"
@@ -168,7 +162,7 @@ export function IPOCard({ ipo, isWatched, onToggleWatch }: IPOCardProps) {
               {highlight}
             </Badge>
           ))}
-        </div>
+        </div> */}
 
         {/* View Details Button */}
         <div className="flex justify-end">
@@ -190,6 +184,39 @@ export function IPOCard({ ipo, isWatched, onToggleWatch }: IPOCardProps) {
         open={showDetails}
         onOpenChange={handleOpenChange}
       />
+    </div>
+  );
+}
+
+// Helper component for metrics
+function MetricItem({
+  icon: Icon,
+  label,
+  value,
+  isPositive,
+}: {
+  icon: LucideIcon;
+  label: string;
+  value: string | number;
+  isPositive?: boolean;
+}) {
+  return (
+    <div className="flex items-center gap-3 group/metric">
+      <Icon className="h-5 w-5 text-muted-foreground group-hover/metric:text-primary transition-colors" />
+      <div>
+        <p className="text-sm text-muted-foreground">{label}</p>
+        <p
+          className={`font-medium ${
+            isPositive !== undefined
+              ? isPositive
+                ? 'text-green-500'
+                : 'text-red-500'
+              : ''
+          }`}
+        >
+          {value}
+        </p>
+      </div>
     </div>
   );
 }

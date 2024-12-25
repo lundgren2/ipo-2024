@@ -24,7 +24,6 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { IPOTimeline } from '@/components/learning/ipo-timeline';
 import { MarketAnalysis } from '@/components/learning/market-analysis';
-import { Button } from '@/components/ui/button';
 import { IPOQuiz } from '@/components/learning/ipo-quiz';
 import { CaseStudies } from '@/components/learning/case-studies';
 

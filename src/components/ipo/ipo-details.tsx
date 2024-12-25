@@ -286,17 +286,6 @@ export function IPODetails({ ipo, open, onOpenChange }: IPODetailsProps) {
                     <h3 className="text-lg font-semibold">
                       Company Highlights
                     </h3>
-                    <div className="grid gap-2">
-                      {ipo.highlights.map((highlight, index) => (
-                        <div
-                          key={index}
-                          className="flex items-center gap-2 text-muted-foreground"
-                        >
-                          <div className="h-1.5 w-1.5 rounded-full bg-primary" />
-                          <span>{highlight}</span>
-                        </div>
-                      ))}
-                    </div>
                   </div>
                 </Card>
               </TabsContent>

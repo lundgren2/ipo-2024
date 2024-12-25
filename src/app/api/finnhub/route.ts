@@ -1,4 +1,14 @@
 import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+
+interface FinnhubData {
+  [key: string]: string | number | boolean;
+}
+
+interface CacheEntry {
+  data: FinnhubData;
+  timestamp: number;
+}
 
 // Use server-side environment variable instead of client-side
 const FINNHUB_API_KEY = process.env.FINNHUB_API_KEY;
@@ -8,9 +18,9 @@ const FINNHUB_BASE_URL = 'https://finnhub.io/api/v1';
 const CACHE_DURATION = 3600;
 
 // In-memory cache for development
-const cache = new Map<string, { data: any; timestamp: number }>();
+const cache = new Map<string, CacheEntry>();
 
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
   try {
     // Verify API key exists
     if (!FINNHUB_API_KEY) {

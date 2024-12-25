@@ -4,22 +4,18 @@ import {
   createContext,
   useContext,
   useState,
-  useCallback,
   useEffect,
   ReactNode,
 } from 'react';
-import { IPO } from '@/types/ipo';
+import type { IPO, WatchlistContextType } from '@/types/ipo';
 
-interface WatchlistContextType {
-  watchedIpos: IPO[];
-  isWatched: (id: string) => boolean;
-  addToWatchlist: (ipo: IPO) => void;
-  removeFromWatchlist: (id: string) => void;
-}
-
-const WatchlistContext = createContext<WatchlistContextType | undefined>(
-  undefined
-);
+const WatchlistContext = createContext<WatchlistContextType>({
+  watchedIpos: [],
+  addToWatchlist: () => {},
+  removeFromWatchlist: () => {},
+  toggleFavorite: () => {},
+  isWatched: () => false,
+});
 
 const STORAGE_KEY = 'ipo-watchlist';
 
@@ -47,29 +43,32 @@ export function WatchlistProvider({ children }: { children: ReactNode }) {
     }
   }, [watchedIpos]);
 
-  const isWatched = useCallback(
-    (id: string) => watchedIpos.some((ipo) => ipo.id === id),
-    [watchedIpos]
-  );
+  const addToWatchlist = (ipo: IPO) => {
+    setWatchedIpos((prev) => [...prev, { ...ipo, isFavorite: false }]);
+  };
 
-  const addToWatchlist = useCallback((ipo: IPO) => {
-    setWatchedIpos((prev) => {
-      if (prev.some((item) => item.id === ipo.id)) return prev;
-      return [...prev, ipo];
-    });
-  }, []);
-
-  const removeFromWatchlist = useCallback((id: string) => {
+  const removeFromWatchlist = (id: string) => {
     setWatchedIpos((prev) => prev.filter((ipo) => ipo.id !== id));
-  }, []);
+  };
+
+  const toggleFavorite = (id: string) => {
+    setWatchedIpos((prev) =>
+      prev.map((ipo) =>
+        ipo.id === id ? { ...ipo, isFavorite: !ipo.isFavorite } : ipo
+      )
+    );
+  };
+
+  const isWatched = (id: string) => watchedIpos.some((ipo) => ipo.id === id);
 
   return (
     <WatchlistContext.Provider
       value={{
         watchedIpos,
-        isWatched,
         addToWatchlist,
         removeFromWatchlist,
+        toggleFavorite,
+        isWatched,
       }}
     >
       {children}
@@ -77,10 +76,4 @@ export function WatchlistProvider({ children }: { children: ReactNode }) {
   );
 }
 
-export function useWatchlist() {
-  const context = useContext(WatchlistContext);
-  if (context === undefined) {
-    throw new Error('useWatchlist must be used within a WatchlistProvider');
-  }
-  return context;
-}
+export const useWatchlist = () => useContext(WatchlistContext);

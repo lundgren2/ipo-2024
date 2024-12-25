@@ -2,29 +2,19 @@ import { getNewsBySlug } from '@/lib/mock-news';
 import { notFound } from 'next/navigation';
 import { Badge } from '@/components/ui/badge';
 import Image from 'next/image';
-import { Metadata, ResolvingMetadata } from 'next';
+import type { Metadata } from 'next';
 import { Card } from '@/components/ui/card';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
 import { Highlight, themes } from 'prism-react-renderer';
+import { PageProps } from '../../../../.next/types/app/page';
 
-type Props = {
-  params: { slug: string };
-  searchParams: { [key: string]: string | string[] | undefined };
-};
-
-export async function generateMetadata(
-  { params }: Props,
-  parent: ResolvingMetadata
-): Promise<Metadata> {
-  // read route params
-  // `params` should be awaited before using its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
+export async function generateMetadata({
+  params,
+}: PageProps): Promise<Metadata> {
   const { slug } = await params;
   const article = await getNewsBySlug(slug);
-
-  // optionally access and extend (rather than replace) parent metadata
-  const previousImages = (await parent).openGraph?.images || [];
 
   if (!article) {
     return {
@@ -36,7 +26,7 @@ export async function generateMetadata(
     title: `${article.title} | IPO Tracker`,
     description: article.description,
     openGraph: {
-      images: [article.imageUrl, ...previousImages],
+      images: [article.imageUrl],
     },
   };
 }
@@ -52,13 +42,12 @@ const components = {
     <h3 className="text-2xl font-bold mt-6 mb-4" {...props} />
   ),
   p: ({ ...props }) => <p className="mb-4 leading-relaxed" {...props} />,
-  ul: ({ ordered, ...props }) => (
-    <ul className="mb-4 space-y-2 ml-4" {...props} />
-  ),
-  ol: ({ ordered, ...props }) => (
-    <ol className="mb-4 space-y-2 ml-4" {...props} />
-  ),
-  li: ({ ordered, ...props }) => (
+  ul: ({ ...props }) => <ul className="mb-4 space-y-2 ml-4" {...props} />,
+  ol: ({ ...props }) => <ol className="mb-4 space-y-2 ml-4" {...props} />,
+  li: ({
+    ordered,
+    ...props
+  }: { ordered?: boolean } & React.HTMLProps<HTMLLIElement>) => (
     <li
       className={`mb-1 ${ordered ? 'list-decimal' : 'list-disc'} list-outside`}
       {...props}
@@ -78,7 +67,16 @@ const components = {
       {...props}
     />
   ),
-  code: ({ inline, className, children, ...props }) => {
+  code: ({
+    inline,
+    className,
+    children,
+    ...props
+  }: {
+    inline?: boolean;
+    className?: string;
+    children: React.ReactNode;
+  }) => {
     const match = /language-(\w+)/.exec(className || '');
     const language = match ? match[1] : '';
     const code = String(children).replace(/\n$/, '');
@@ -124,6 +122,7 @@ const components = {
     </div>
   ),
   img: ({ ...props }) => (
+    // eslint-disable-next-line @next/next/no-img-element
     <img
       className="rounded-lg my-8 max-w-full h-auto"
       {...props}
@@ -146,7 +145,7 @@ const components = {
   ),
 };
 
-export default async function NewsPage({ params }: Props) {
+export default async function NewsPage({ params }: PageProps) {
   const { slug } = await params;
   const article = await getNewsBySlug(slug);
 

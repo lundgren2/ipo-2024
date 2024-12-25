@@ -1,15 +1,9 @@
-export interface NewsItem {
-  title: string;
-  description: string;
-  date: string;
-  imageUrl: string;
-  category: string;
-  slug: string;
-  content?: string;
-  author?: string;
-}
+import type { NewsItem } from '@/types/news';
+
+export { NewsItem };
 
 export const featuredStory: NewsItem = {
+  id: 'reddit-ipo-2024',
   title: 'Reddit IPO: A New Era for Social Media Platforms',
   description:
     "Reddit's highly anticipated IPO marks a significant milestone in the evolution of social media platforms and community-driven content.",
@@ -43,6 +37,7 @@ As Reddit prepares to enter the public markets, investors will be watching close
 
 export const trendingNews: NewsItem[] = [
   {
+    id: 'stripe-ipo-2024',
     title: "Stripe's Path to Public Markets",
     description:
       'Payment giant Stripe takes steps toward a potential 2024 IPO, signaling a major shift in fintech landscape.',
@@ -69,6 +64,7 @@ The company has been strengthening its executive team and corporate governance s
 Stripe's potential IPO could have far-reaching implications for the fintech sector, potentially inspiring other private fintech companies to consider public listings.`,
   },
   {
+    id: 'ai-startups-ipo-2024',
     title: 'AI Startups Rush to IPO Market',
     description:
       'Artificial intelligence companies are leading the new wave of tech IPOs in 2024.',
@@ -91,6 +87,7 @@ Stripe's potential IPO could have far-reaching implications for the fintech sect
 The rush of AI companies to public markets is creating new opportunities for investors while also raising questions about valuations and long-term sustainability.`,
   },
   {
+    id: 'healthcare-ipos-q1-2024',
     title: 'Healthcare IPOs Surge in Q1',
     description:
       'Healthcare sector sees unprecedented IPO activity driven by biotech innovations.',
@@ -116,6 +113,7 @@ The convergence of healthcare and technology is creating new opportunities for c
 
 export const marketAnalysis: NewsItem[] = [
   {
+    id: 'ipo-market-outlook-2024',
     title: 'IPO Market Outlook 2024',
     description:
       'Analysis of market conditions and trends shaping IPO landscape.',
@@ -186,6 +184,7 @@ The following trends are shaping the IPO landscape:
 As we move further into 2024, we expect continued strength in the IPO market, particularly in the technology and healthcare sectors.`,
   },
   {
+    id: 'sector-performance-review-2024',
     title: 'Sector Performance Review',
     description: 'Detailed analysis of how different sectors perform post-IPO.',
     date: '2024-03-20',
@@ -243,6 +242,7 @@ Understanding sector performance helps investors:
 * Manage risk exposure appropriately`,
   },
   {
+    id: 'global-ipo-trends-2024',
     title: 'Global IPO Trends',
     description:
       'International perspectives on IPO markets and cross-border listings.',
@@ -297,6 +297,7 @@ The rise in cross-border listings presents new opportunities:
 
 export const latestNews: NewsItem[] = [
   {
+    id: 'shein-ipo-2024',
     title: 'Shein Files Confidentially for US IPO',
     description:
       'Fast-fashion giant Shein has confidentially filed for a US IPO, sources say.',
@@ -333,6 +334,7 @@ This IPO could reshape the retail landscape:
 * Validates digital-first business models`,
   },
   {
+    id: 'green-energy-ipos-2024',
     title: 'Green Energy IPOs Gain Momentum',
     description:
       'Renewable energy companies see strong investor interest in public offerings.',
@@ -346,6 +348,7 @@ This IPO could reshape the retail landscape:
     `,
   },
   {
+    id: 'tech-unicorns-2024',
     title: 'Tech Unicorns Eye Public Markets',
     description:
       'Several technology unicorns prepare for potential IPOs in the coming months.',

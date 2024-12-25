@@ -7,7 +7,6 @@ import {
   Building2,
   TrendingUp,
   Users2,
-  DollarSign,
   LineChart,
   PieChart,
   ArrowRight,
