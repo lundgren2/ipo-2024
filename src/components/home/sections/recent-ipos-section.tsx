@@ -16,6 +16,9 @@ type IPO = {
   popularity?: number; // 1-100
   backgroundImage?: string;
   status: 'active' | 'listed';
+  priceRange?: string;
+  sharesOffered?: string;
+  marketCap?: string;
 };
 
 const ipoData: IPO[] = [
@@ -31,6 +34,9 @@ const ipoData: IPO[] = [
     backgroundImage:
       'https://images.unsplash.com/photo-1432821596592-e2c18b78144f',
     status: 'active',
+    priceRange: '$31.00 - $34.00',
+    sharesOffered: '22M',
+    marketCap: '$6.5B',
   },
   {
     logo: 'https://logo.clearbit.com/stripe.com',
@@ -44,6 +50,9 @@ const ipoData: IPO[] = [
     backgroundImage:
       'https://images.unsplash.com/photo-1559526324-593bc073d938',
     status: 'active',
+    priceRange: '$75.00 - $85.00',
+    sharesOffered: '30M',
+    marketCap: '$80B',
   },
   {
     logo: 'https://logo.clearbit.com/shein.com',
@@ -106,7 +115,7 @@ export function RecentIPOsSection() {
           <div className="grid md:grid-cols-2 gap-4">
             {activeIPOs.map((ipo) => (
               <Link href={`/ipo/${ipo.ticker.toLowerCase()}`} key={ipo.ticker}>
-                <Card className="group relative overflow-hidden h-48">
+                <Card className="group relative overflow-hidden h-64">
                   {/* Background Image */}
                   <div className="absolute inset-0">
                     <Image
@@ -120,38 +129,78 @@ export function RecentIPOsSection() {
 
                   {/* Content */}
                   <div className="relative h-full p-6 flex flex-col justify-between">
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-center gap-4">
-                        <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-white dark:bg-slate-800 border dark:border-slate-700">
-                          <Image
-                            src={ipo.logo}
-                            alt={`${ipo.name} logo`}
-                            fill
-                            className="object-contain p-2"
-                          />
+                    <div>
+                      <div className="flex items-start justify-between mb-4">
+                        <div className="flex items-center gap-4">
+                          <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-white dark:bg-slate-800 border dark:border-slate-700">
+                            <Image
+                              src={ipo.logo}
+                              alt={`${ipo.name} logo`}
+                              fill
+                              className="object-contain p-2"
+                            />
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <h3 className="font-medium text-lg text-white">
+                                {ipo.name}
+                              </h3>
+                              <span className="text-sm text-white/80 font-mono">
+                                ${ipo.ticker}
+                              </span>
+                            </div>
+                            <p className="text-sm text-white/60">
+                              {ipo.sector}
+                            </p>
+                          </div>
+                        </div>
+                        <Image
+                          src={`https://flagcdn.com/w40/${ipo.country}.png`}
+                          alt={ipo.country}
+                          width={24}
+                          height={16}
+                          className="rounded"
+                        />
+                      </div>
+
+                      {/* IPO Details */}
+                      <div className="grid grid-cols-2 gap-4 mb-4">
+                        <div>
+                          <p className="text-xs text-white/60 mb-1">
+                            Price Range
+                          </p>
+                          <p className="text-sm text-white font-medium">
+                            {ipo.priceRange}
+                          </p>
                         </div>
                         <div>
-                          <div className="flex items-center gap-2">
-                            <h3 className="font-medium text-lg text-white">
-                              {ipo.name}
-                            </h3>
-                            <span className="text-sm text-white/80 font-mono">
-                              ${ipo.ticker}
-                            </span>
-                          </div>
-                          <p className="text-sm text-white/60">{ipo.sector}</p>
+                          <p className="text-xs text-white/60 mb-1">
+                            Shares Offered
+                          </p>
+                          <p className="text-sm text-white font-medium">
+                            {ipo.sharesOffered}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-white/60 mb-1">
+                            Market Cap
+                          </p>
+                          <p className="text-sm text-white font-medium">
+                            {ipo.marketCap}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-white/60 mb-1">
+                            Expected Trading
+                          </p>
+                          <p className="text-sm text-white font-medium">
+                            {ipo.firstTradingDay}
+                          </p>
                         </div>
                       </div>
-                      <Image
-                        src={`https://flagcdn.com/w40/${ipo.country}.png`}
-                        alt={ipo.country}
-                        width={24}
-                        height={16}
-                        className="rounded"
-                      />
                     </div>
 
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between pt-4">
                       <div className="flex items-center gap-2">
                         <TrendingUp className="w-4 h-4 text-green-400" />
                         <span className="text-sm text-white/80">
