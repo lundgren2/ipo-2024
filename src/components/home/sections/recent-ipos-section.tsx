@@ -92,7 +92,7 @@ export function RecentIPOsSection() {
 
   return (
     <section className="w-full py-16">
-      <div className="max-w-[1280px] mx-auto px-4">
+      <div className="max-w-7xl container mx-auto px-4">
         {/* Active IPOs */}
         <div className="mb-16">
           <div className="flex justify-between items-center mb-8">
