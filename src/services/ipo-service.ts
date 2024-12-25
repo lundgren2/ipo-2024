@@ -461,7 +461,7 @@ async function processIPO(ipo: FinnhubIPO): Promise<IPO | null> {
     }).format(ipoDate);
 
     const transformedIPO: IPO = {
-      id: ipo.symbol,
+      id: generateUniqueId(ipo),
       name: details?.name || ipo.name || 'Unknown Company',
       date: formattedDate,
       status: getIPOStatus(ipoDate),
@@ -481,6 +481,8 @@ async function processIPO(ipo: FinnhubIPO): Promise<IPO | null> {
       isin: ipo.isin,
       cusip: ipo.cusip,
     };
+
+    return transformedIPO;
   } catch (error) {
     console.error('Error processing IPO:', { error, ipo });
     return null;
@@ -524,32 +526,4 @@ export function cleanup(): void {
   valuationCache.destroy();
   ipoCache.destroy();
   detailsCache.destroy();
-}
-
-function transformIPO(ipo: FinnhubIPO, details?: CompanyDetails | null): IPO {
-  const ipoDate = new Date(ipo.date);
-  const formattedDate = ipoDate.toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  });
-
-  const parsedValuation = parseValuation(details?.marketCapitalization || 0);
-
-  return {
-    id: ipo.symbol,
-    name: details?.name || ipo.name || 'Unknown Company',
-    date: formattedDate,
-    status: getIPOStatus(ipoDate),
-    valuation: parsedValuation,
-    sector:
-      details?.finnhubIndustry || ipo.industry || CONFIG.DEFAULTS.INDUSTRY,
-    exchange: details?.exchange || ipo.exchange || CONFIG.DEFAULTS.EXCHANGE,
-    change: '+0%', // TODO: Implement real change calculation
-    isPositive: true,
-    interest: getInterestLevel(parsedValuation),
-    highlights: generateHighlights(ipo, details, parsedValuation),
-    logo: details?.logo || CONFIG.DEFAULTS.LOGO,
-    companyDetails: details || undefined,
-  };
 }
