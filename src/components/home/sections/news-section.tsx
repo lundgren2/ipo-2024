@@ -53,7 +53,7 @@ const recentNews = [
 export function NewsSection() {
   return (
     <section className="w-full py-12">
-      <div className="container mx-auto px-4">
+      <div className="container max-w-7xl mx-auto px-4">
         <div className="grid gap-8 lg:grid-cols-5">
           {/* Featured Story - Takes up 3 columns */}
           <div className="lg:col-span-3">
