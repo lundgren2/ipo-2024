@@ -9,12 +9,16 @@ import {
 // Type definitions
 export type IdentifierType = 'symbol' | 'isin' | 'cusip';
 
-interface CacheEntry<T> {
+export interface CacheEntry<T> {
   data: T;
   timestamp: number;
 }
 
-type CacheKey = `${IdentifierType}:${string}`;
+export interface CacheStore<T> {
+  get: (key: string) => T | null;
+  set: (key: string, value: T) => void;
+  clear: () => void;
+}
 
 // Configuration
 const CONFIG = {
@@ -38,56 +42,50 @@ const CONFIG = {
   },
 } as const;
 
-// Cache maps with TTL and automatic cleanup
-class TTLCache<T> {
-  private cache = new Map<string, { data: T; timestamp: number }>();
-  private cleanupInterval: NodeJS.Timeout;
+// Create a functional cache store
+function createCacheStore<T>(ttl: number): CacheStore<T> {
+  const store = new Map<string, CacheEntry<T>>();
 
-  constructor(private ttl: number) {
-    // Run cleanup every minute
-    this.cleanupInterval = setInterval(() => this.cleanup(), 60 * 1000);
-  }
-
-  get(key: string): T | null {
-    const entry = this.cache.get(key);
-    if (!entry) return null;
-
-    if (Date.now() - entry.timestamp > this.ttl) {
-      this.cache.delete(key);
-      return null;
-    }
-
-    return entry.data;
-  }
-
-  set(key: string, value: T): void {
-    this.cache.set(key, { data: value, timestamp: Date.now() });
-  }
-
-  clear(): void {
-    this.cache.clear();
-  }
-
-  private cleanup(): void {
+  // Start cleanup interval
+  const cleanup = () => {
     const now = Date.now();
-    for (const [key, entry] of this.cache.entries()) {
-      if (now - entry.timestamp > this.ttl) {
-        this.cache.delete(key);
+    for (const [key, entry] of store.entries()) {
+      if (now - entry.timestamp > ttl) {
+        store.delete(key);
       }
     }
-  }
+  };
 
-  destroy(): void {
-    clearInterval(this.cleanupInterval);
-    this.cache.clear();
-  }
+  setInterval(cleanup, 60 * 1000);
+
+  return {
+    get(key: string): T | null {
+      const entry = store.get(key);
+      if (!entry) return null;
+
+      if (Date.now() - entry.timestamp > ttl) {
+        store.delete(key);
+        return null;
+      }
+
+      return entry.data;
+    },
+
+    set(key: string, value: T): void {
+      store.set(key, { data: value, timestamp: Date.now() });
+    },
+
+    clear(): void {
+      store.clear();
+    },
+  };
 }
 
 // Initialize caches
-const dateCache = new TTLCache<number>(CONFIG.CACHE.DURATION);
-const valuationCache = new TTLCache<number>(CONFIG.CACHE.DURATION);
-const ipoCache = new TTLCache<IPO[]>(CONFIG.CACHE.DURATION);
-const detailsCache = new TTLCache<CompanyDetails>(CONFIG.CACHE.DURATION);
+const dateCache = createCacheStore<number>(CONFIG.CACHE.DURATION);
+const valuationCache = createCacheStore<number>(CONFIG.CACHE.DURATION);
+const ipoCache = createCacheStore<IPO[]>(CONFIG.CACHE.DURATION);
+const detailsCache = createCacheStore<CompanyDetails>(CONFIG.CACHE.DURATION);
 
 // Utility functions with error handling
 export function parseDate(dateStr: string): number {
@@ -160,64 +158,32 @@ async function retryRequest<T>(
     return await fn();
   } catch (error) {
     if (retries <= 0) throw error;
-
     await new Promise((resolve) => setTimeout(resolve, delay));
     return retryRequest(fn, retries - 1, delay * 2);
   }
 }
 
-// Cache class implementation
-class APICache {
-  private ipos = new Map<number, CacheEntry<IPO[]>>();
-  private details = new Map<CacheKey, CacheEntry<CompanyDetails>>();
+// Cache implementation using functional approach
+const cache = {
+  isValid: (timestamp: number): boolean =>
+    Date.now() - timestamp < CONFIG.CACHE.DURATION,
 
-  isValid(timestamp: number): boolean {
-    return Date.now() - timestamp < CONFIG.CACHE.DURATION;
-  }
+  getIPOs: (limit: number): IPO[] | null => ipoCache.get(String(limit)),
 
-  getIPOs(limit: number): IPO[] | null {
-    const entry = this.ipos.get(limit);
-    if (entry && this.isValid(entry.timestamp)) {
-      return entry.data;
-    }
-    return null;
-  }
+  setIPOs: (limit: number, data: IPO[]): void =>
+    ipoCache.set(String(limit), data),
 
-  setIPOs(limit: number, data: IPO[]): void {
-    this.ipos.set(limit, {
-      data,
-      timestamp: Date.now(),
-    });
-  }
+  getDetails: (type: string, identifier: string): CompanyDetails | null =>
+    detailsCache.get(`${type}:${identifier}`),
 
-  getDetails(type: IdentifierType, identifier: string): CompanyDetails | null {
-    const key = `${type}:${identifier}` as CacheKey;
-    const entry = this.details.get(key);
-    if (entry && this.isValid(entry.timestamp)) {
-      return entry.data;
-    }
-    return null;
-  }
+  setDetails: (type: string, identifier: string, data: CompanyDetails): void =>
+    detailsCache.set(`${type}:${identifier}`, data),
 
-  setDetails(
-    type: IdentifierType,
-    identifier: string,
-    data: CompanyDetails
-  ): void {
-    const key = `${type}:${identifier}` as CacheKey;
-    this.details.set(key, {
-      data,
-      timestamp: Date.now(),
-    });
-  }
-
-  clear(): void {
-    this.ipos.clear();
-    this.details.clear();
-  }
-}
-
-const cache = new APICache();
+  clear: (): void => {
+    ipoCache.clear();
+    detailsCache.clear();
+  },
+};
 
 // Helper functions for IPO status and interest level
 function getIPOStatus(
@@ -522,8 +488,8 @@ export async function fetchIPOPerformance(): Promise<IPOPerformanceData> {
 
 // Cleanup function to be called when the app unmounts
 export function cleanup(): void {
-  dateCache.destroy();
-  valuationCache.destroy();
-  ipoCache.destroy();
-  detailsCache.destroy();
+  dateCache.clear();
+  valuationCache.clear();
+  ipoCache.clear();
+  detailsCache.clear();
 }
