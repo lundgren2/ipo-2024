@@ -107,7 +107,7 @@ export function BreakingNews() {
 
   return (
     <div className="bg-gradient-to-r from-primary/5 via-primary/10 to-primary/5 border-b">
-      <div className="max-w-full mx-auto px-4 py-2.5">
+      <div className="max-w-full mx-auto px-4 py-2">
         <div
           ref={scrollRef}
           className="flex overflow-x-auto gap-8 scrollbar-hide"

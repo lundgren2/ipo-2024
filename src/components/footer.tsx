@@ -84,7 +84,7 @@ export function Footer() {
                     >
                       {link.name}
                       {link.badge ? (
-                        <span className="text-[10px] font-medium bg-primary/10 text-primary px-1.5 py-0.5 rounded">
+                        <span className="text-[10px] font-medium bg-brand/10 text-brand px-1.5 py-0.5 rounded">
                           {link.badge}
                         </span>
                       ) : null}
@@ -99,7 +99,7 @@ export function Footer() {
         {/* Bottom Bar */}
         <div className="flex flex-col md:flex-row justify-between items-center pt-8 border-t border-muted-foreground/10">
           <div className="text-sm mb-4 md:mb-0">
-            © {new Date().getFullYear()} IPO.se - All rights reserved
+            © 2017 - {new Date().getFullYear()} IPO.se - All rights reserved
           </div>
           <div className="flex items-center gap-6">
             <Link
