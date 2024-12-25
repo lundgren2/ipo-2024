@@ -5,6 +5,7 @@ import { ThemeProvider } from '@/components/theme-provider';
 import { WatchlistProvider } from '@/context/watchlist-context';
 import { Toaster } from '@/components/ui/toaster';
 import { Navbar } from '@/components/Navbar';
+import { Footer } from '@/components/footer';
 const geistSans = Geist({
   variable: '--font-geist-sans',
   subsets: ['latin'],
@@ -41,6 +42,7 @@ export default function RootLayout({
             <Navbar />
             <main>{children}</main>
             <Toaster />
+            <Footer />
           </WatchlistProvider>
         </ThemeProvider>
       </body>
