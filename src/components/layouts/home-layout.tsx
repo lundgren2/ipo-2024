@@ -1,26 +1,18 @@
-import { Suspense } from 'react';
-import { NewsLoadingSkeleton } from '@/components/news/loading-skeleton';
-import { HeroSection } from '@/components/home/sections/hero';
-import { BreakingNews } from '@/components/home/sections/breaking-news';
-import { FeaturedIPO } from '@/components/home/sections/featured-ipo';
 import { NewsSection } from '@/components/home/sections/news-section';
+import { RecentIPOsSection } from '@/components/home/sections/recent-ipos-section';
+import { HeroSection } from '@/components/home/sections/hero';
+import { FeaturedIPO } from '@/components/home/sections/featured-ipo';
 import { SecondarySections } from '@/components/home/secondary-sections';
-import type { NewsItem } from '@/types/news';
 
-interface HomeLayoutProps {
-  initialNews: NewsItem[];
-}
-
-export function HomeLayout({ initialNews }: HomeLayoutProps) {
+export function HomeLayout() {
   return (
-    <div className="min-h-screen bg-background">
-      <BreakingNews />
-      <Suspense fallback={<NewsLoadingSkeleton />}>
-        <NewsSection initialNews={initialNews} />
-      </Suspense>
+    <main className="flex min-h-screen flex-col">
+      <NewsSection />
+      <RecentIPOsSection />
       <HeroSection />
       <FeaturedIPO />
       <SecondarySections />
-    </div>
+      {/* Other sections */}
+    </main>
   );
 }
