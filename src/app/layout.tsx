@@ -6,6 +6,7 @@ import { WatchlistProvider } from '@/context/watchlist-context';
 import { Toaster } from '@/components/ui/toaster';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/footer';
+
 const geistSans = Geist({
   variable: '--font-geist-sans',
   subsets: ['latin'],
@@ -30,7 +31,8 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen`}
+        className={`antialiased min-h-screen ${geistSans.variable} ${geistMono.variable}`}
+        suppressHydrationWarning
       >
         <ThemeProvider
           attribute="class"
@@ -38,12 +40,12 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
+          <Navbar />
           <WatchlistProvider>
-            <Navbar />
             <main>{children}</main>
-            <Toaster />
-            <Footer />
           </WatchlistProvider>
+          <Toaster />
+          <Footer />
         </ThemeProvider>
       </body>
     </html>

@@ -97,9 +97,9 @@ export function Footer() {
         </div>
 
         {/* Bottom Bar */}
-        <div className="flex flex-col md:flex-row justify-between items-center pt-8 border-t border-slate-800">
+        <div className="flex flex-col md:flex-row justify-between items-center pt-8 border-t border-muted-foreground/10">
           <div className="text-sm mb-4 md:mb-0">
-            © 2024 IPO Tracker. All rights reserved
+            © {new Date().getFullYear()} IPO.se - All rights reserved
           </div>
           <div className="flex items-center gap-6">
             <Link
