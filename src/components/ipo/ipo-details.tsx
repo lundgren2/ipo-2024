@@ -39,6 +39,7 @@ import { IPO, CompanyDetails } from '@/types/ipo';
 import { useWatchlist } from '@/context/watchlist-context';
 import { useToast } from '@/hooks/use-toast';
 import Image from 'next/image';
+import { IPOTimeline, type TimelineStage } from './ipo-timeline';
 
 interface IPODetailsProps {
   ipo: IPO;
@@ -143,6 +144,41 @@ export function IPODetails({ ipo, open, onOpenChange }: IPODetailsProps) {
     }
   }, [watched, ipo, addToWatchlist, removeFromWatchlist]);
 
+  // Add timeline stages based on IPO status and dates
+  const timelineStages: TimelineStage[] = [
+    {
+      id: 'announcement',
+      title: 'IPO Announced',
+      date: ipo.date,
+      status: 'completed',
+      description:
+        'Company announces intention to go public and files initial paperwork.',
+    },
+    {
+      id: 'bookbuilding',
+      title: 'Book Building',
+      date: 'April 15, 2024', // This should be dynamic based on your data
+      status: 'current',
+      description:
+        'Investment banks gather interest from institutional investors to determine the IPO price.',
+    },
+    {
+      id: 'pricing',
+      title: 'Final Pricing',
+      date: 'April 20, 2024', // This should be dynamic based on your data
+      status: 'upcoming',
+      description:
+        'Final IPO price is set based on investor demand and market conditions.',
+    },
+    {
+      id: 'trading',
+      title: 'Trading Begins',
+      date: 'April 21, 2024', // This should be dynamic based on your data
+      status: 'upcoming',
+      description: 'Shares begin trading on the public market.',
+    },
+  ];
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange} modal={true}>
       <DialogContent
@@ -225,6 +261,7 @@ export function IPODetails({ ipo, open, onOpenChange }: IPODetailsProps) {
             <Tabs defaultValue="overview">
               <TabsList className="select-none">
                 <TabsTrigger value="overview">Overview</TabsTrigger>
+                <TabsTrigger value="timeline">Timeline</TabsTrigger>
                 <TabsTrigger value="details">Details</TabsTrigger>
                 <TabsTrigger value="analysis">Analysis</TabsTrigger>
               </TabsList>
@@ -277,6 +314,13 @@ export function IPODetails({ ipo, open, onOpenChange }: IPODetailsProps) {
                     Expected Price Movement
                   </h3>
                   <PriceChart data={mockPriceData} />
+                </Card>
+              </TabsContent>
+
+              <TabsContent value="timeline">
+                <Card className="p-6">
+                  <h3 className="text-lg font-semibold mb-6">IPO Timeline</h3>
+                  <IPOTimeline stages={timelineStages} />
                 </Card>
               </TabsContent>
 
