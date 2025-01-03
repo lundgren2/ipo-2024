@@ -1,16 +1,9 @@
 'use client';
 
 import { useState, useEffect, useCallback, memo } from 'react';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from '@/components/ui/dialog';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Progress } from '@/components/ui/progress';
@@ -28,28 +21,17 @@ import {
   Bell,
   Share2,
   ExternalLink,
-  Building,
-  Users,
-  DollarSign,
-  Calendar,
-  Info,
-  AlertCircle,
+  FileText,
+  CalendarPlus,
   ChevronRight,
-  Bookmark,
-  Download,
-  Mail,
+  CheckCircle2,
 } from 'lucide-react';
 import { fetchIPODetails } from '@/services/ipo-service';
 import { IPO, CompanyDetails } from '@/types/ipo';
 import { useWatchlist } from '@/context/watchlist-context';
 import { useToast } from '@/hooks/use-toast';
 import Image from 'next/image';
-import { IPOTimeline, type TimelineStage } from './ipo-timeline';
-import {
-  HoverCard,
-  HoverCardContent,
-  HoverCardTrigger,
-} from '@/components/ui/hover-card';
+import { type TimelineStage } from './ipo-timeline';
 import { cn } from '@/lib/utils';
 
 interface IPODetailsProps {
@@ -78,14 +60,42 @@ const PriceChart = memo(({ data }: { data: PriceDataPoint[] }) => (
       <AreaChart data={data}>
         <defs>
           <linearGradient id="colorPrice" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="5%" stopColor="hsl(var(--brand))" stopOpacity={0.1} />
+            <stop
+              offset="5%"
+              stopColor="hsl(var(--brand))"
+              stopOpacity={0.15}
+            />
             <stop offset="95%" stopColor="hsl(var(--brand))" stopOpacity={0} />
           </linearGradient>
         </defs>
-        <CartesianGrid strokeDasharray="3 3" />
-        <XAxis dataKey="date" />
-        <YAxis />
-        <Tooltip />
+        <CartesianGrid
+          strokeDasharray="3 3"
+          stroke="hsl(var(--muted-foreground))"
+          opacity={0.1}
+        />
+        <XAxis
+          dataKey="date"
+          stroke="hsl(var(--muted-foreground))"
+          fontSize={12}
+          tickLine={false}
+          axisLine={false}
+          dy={10}
+        />
+        <YAxis
+          stroke="hsl(var(--muted-foreground))"
+          fontSize={12}
+          tickLine={false}
+          axisLine={false}
+          dx={-10}
+        />
+        <Tooltip
+          contentStyle={{
+            backgroundColor: 'hsl(var(--background))',
+            border: '1px solid hsl(var(--border))',
+            borderRadius: '6px',
+            fontSize: '12px',
+          }}
+        />
         <Area
           type="monotone"
           dataKey="price"
@@ -200,318 +210,358 @@ export function IPODetails({ ipo, open, onOpenChange }: IPODetailsProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange} modal={true}>
-      <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
-        {/* Header Section */}
-        <DialogHeader className="select-none pb-6 border-b">
-          <div className="flex items-start justify-between">
-            <div className="flex items-center gap-4">
-              <div className="relative w-16 h-16 rounded-lg overflow-hidden bg-muted flex items-center justify-center">
-                {ipo.logo || companyDetails?.logo ? (
+      <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 p-0">
+        {/* Hero Section */}
+        <div className="flex flex-col">
+          <div className="relative h-[250px] w-full overflow-hidden">
+            <Image
+              src={
+                'https://images.unsplash.com/photo-1640340434855-6084b1f4901c?q=80&w=1964&fit=crop'
+              }
+              alt={ipo.name}
+              fill
+              className="object-cover brightness-75"
+              priority
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-background to-transparent" />
+            <div className="absolute inset-x-0 bottom-0 p-8">
+              <div className="flex items-center gap-4 mb-4">
+                <div className="relative w-16 h-16 rounded-xl overflow-hidden bg-background/10 backdrop-blur-lg border border-white/10">
                   <Image
-                    src={ipo.logo || companyDetails?.logo || ''}
-                    alt={ipo.name}
-                    width={64}
-                    height={64}
-                    className="object-contain"
+                    src={
+                      ipo.logo ||
+                      companyDetails?.logo ||
+                      '/images/default-company-logo.svg'
+                    }
+                    alt={`${ipo.name} logo`}
+                    fill
+                    className="object-contain p-2"
                   />
-                ) : (
-                  <Building className="h-8 w-8 text-muted-foreground" />
-                )}
-              </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <DialogTitle className="text-2xl">{ipo.name}</DialogTitle>
-                  <Badge variant="outline" className="text-xs">
+                </div>
+                <div>
+                  <Badge
+                    variant="secondary"
+                    className="mb-2 bg-white/10 text-white border-none backdrop-blur-sm"
+                  >
                     {ipo.symbol || 'TBA'}
                   </Badge>
+                  <h1 className="text-3xl font-semibold text-white">
+                    {ipo.name}
+                  </h1>
+                  <div className="flex items-center gap-3 text-white/80 text-sm mt-1">
+                    <span>{ipo.sector}</span>
+                    <span className="text-white/40">•</span>
+                    <span>{ipo.exchange}</span>
+                  </div>
                 </div>
-                <DialogDescription className="mt-1.5 flex items-center gap-2">
-                  <span>{ipo.sector}</span>
-                  <span>•</span>
-                  <span>{ipo.exchange}</span>
-                </DialogDescription>
-                <div className="flex gap-2 mt-2">
-                  <Badge variant={ipo.isPositive ? 'default' : 'destructive'}>
-                    {ipo.change}
-                  </Badge>
-                  <Badge variant="secondary">Interest: {ipo.interest}</Badge>
-                </div>
-              </div>
-            </div>
-            <div className="flex flex-col items-end gap-2">
-              <div className="flex gap-2">
-                <Button variant="outline" size="sm" onClick={handleShare}>
-                  <Share2 className="h-4 w-4 mr-2" />
-                  Share
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleNotification}
-                >
-                  <Bell className="h-4 w-4 mr-2" />
-                  Alert
-                </Button>
-                <Button
-                  variant={watched ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={toggleWatchlist}
-                >
-                  <Star
-                    className={`h-4 w-4 mr-2 ${
-                      watched ? 'fill-primary-foreground' : ''
-                    }`}
-                  />
-                  {watched ? 'Watching' : 'Watch'}
-                </Button>
-              </div>
-              <div className="text-sm text-muted-foreground">
-                IPO Date: {ipo.date}
               </div>
             </div>
           </div>
-        </DialogHeader>
+        </div>
 
-        {loading ? (
-          <LoadingState />
-        ) : (
-          <div className="mt-6">
-            {/* Quick Actions */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-              <QuickActionCard
-                icon={<Download className="h-4 w-4" />}
-                title="Prospectus"
-                description="Download IPO documents"
-                onClick={() => {}}
-              />
-              <QuickActionCard
-                icon={<Mail className="h-4 w-4" />}
-                title="Updates"
-                description="Subscribe to IPO updates"
-                onClick={() => {}}
-              />
-              <QuickActionCard
-                icon={<Calendar className="h-4 w-4" />}
-                title="Calendar"
-                description="Add key dates to calendar"
-                onClick={() => {}}
-              />
-              <QuickActionCard
-                icon={<Bookmark className="h-4 w-4" />}
-                title="Save"
-                description="Save for later reference"
-                onClick={() => {}}
-              />
+        <div className="p-8 pt-6">
+          {/* Quick Stats Bar */}
+          <div className="flex items-center justify-between p-4 mb-8 rounded-xl bg-muted/30 border border-border/50 backdrop-blur-sm">
+            <div className="grid grid-cols-3 gap-8 flex-1">
+              <div>
+                <div className="text-sm text-muted-foreground mb-1">
+                  Expected Date
+                </div>
+                <div className="font-medium">{ipo.date}</div>
+              </div>
+              <div>
+                <div className="text-sm text-muted-foreground mb-1">
+                  Valuation
+                </div>
+                <div className="font-medium">{ipo.valuation || 'TBA'}</div>
+              </div>
+              <div>
+                <div className="text-sm text-muted-foreground mb-1">
+                  Interest Level
+                </div>
+                <div className="font-medium">{ipo.interest}% Interest</div>
+              </div>
             </div>
-
-            {/* Key Metrics */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-              <MetricCard
-                title="Expected Valuation"
-                value={ipo.valuation || 'TBA'}
-                change={ipo.change}
-                icon={<DollarSign className="h-5 w-5" />}
-                description="Based on latest estimates"
-              />
-              <MetricCard
-                title="Market Interest"
-                value={ipo.interest ? `${ipo.interest}%` : 'TBA'}
-                trend={
-                  ipo.interest ? (
-                    <Progress value={ipo.interest} className="h-2 mt-2" />
-                  ) : undefined
-                }
-                icon={<Users className="h-5 w-5" />}
-                description="Investor demand level"
-              />
-              <MetricCard
-                title="IPO Status"
-                value={ipo.status || 'Upcoming'}
-                badge={
-                  <Badge variant="outline" className="mt-2">
-                    {getStatusLabel(ipo.status)}
-                  </Badge>
-                }
-                icon={<AlertCircle className="h-5 w-5" />}
-                description="Current phase"
-              />
+            <div className="flex items-center gap-3 ml-8">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleShare}
+                className="group hover:border-brand/30"
+              >
+                <Share2 className="h-4 w-4 mr-2 group-hover:text-brand transition-colors" />
+                Share
+              </Button>
+              <Button
+                variant={watched ? 'default' : 'outline'}
+                size="sm"
+                onClick={toggleWatchlist}
+                className={cn('group', !watched && 'hover:border-brand/30')}
+              >
+                <Star
+                  className={cn(
+                    'h-4 w-4 mr-2 transition-colors',
+                    watched
+                      ? 'fill-primary-foreground'
+                      : 'group-hover:text-brand group-hover:fill-brand/20'
+                  )}
+                />
+                {watched ? 'Watching' : 'Watch'}
+              </Button>
             </div>
+          </div>
 
-            {/* Main Content */}
-            <Tabs defaultValue="overview" className="space-y-4">
-              <TabsList className="select-none grid grid-cols-4 gap-4">
-                <TabsTrigger value="overview">Overview</TabsTrigger>
-                <TabsTrigger value="timeline">Timeline</TabsTrigger>
-                <TabsTrigger value="financials">Financials</TabsTrigger>
-                <TabsTrigger value="insights">Insights</TabsTrigger>
-              </TabsList>
+          {loading ? (
+            <LoadingState />
+          ) : (
+            <div className="grid grid-cols-3 gap-8">
+              {/* Main Content */}
+              <div className="col-span-2 space-y-8">
+                {/* About Section */}
+                <div className="space-y-4">
+                  <h2 className="text-xl font-semibold">About {ipo.name}</h2>
+                  <p className="text-muted-foreground leading-relaxed">
+                    {companyDetails?.description ||
+                      'Company description will be available soon.'}
+                  </p>
+                </div>
 
-              <TabsContent value="overview">
-                <div className="grid gap-6">
-                  {/* Company Description */}
-                  <Card className="p-6">
-                    <h3 className="text-lg font-semibold mb-4">
-                      About {ipo.name}
+                {/* Highlights and Risks */}
+                <div className="grid grid-cols-2 gap-8">
+                  <div>
+                    <h3 className="text-lg font-medium mb-4">
+                      Investment Highlights
                     </h3>
-                    <p className="text-muted-foreground">
-                      {companyDetails?.description ||
-                        'Company description will be available soon.'}
-                    </p>
+                    <div className="space-y-3">
+                      {ipo.highlights?.map((highlight, index) => (
+                        <div key={index} className="flex items-start gap-3">
+                          <div className="p-1.5 rounded-full bg-brand/10">
+                            <ChevronRight className="h-4 w-4 text-brand" />
+                          </div>
+                          <p className="text-sm text-muted-foreground">
+                            {highlight}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <h3 className="text-lg font-medium mb-4">
+                      Risk Assessment
+                    </h3>
+                    <div className="space-y-3">
+                      {getRiskFactors().map((risk, index) => (
+                        <div
+                          key={index}
+                          className="flex items-center justify-between"
+                        >
+                          <span className="text-sm text-muted-foreground">
+                            {risk.name}
+                          </span>
+                          <RiskBadge level={risk.level} />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Market Performance */}
+                <div>
+                  <h3 className="text-lg font-medium mb-4">
+                    Market Performance
+                  </h3>
+                  <Card className="overflow-hidden border-border/50">
+                    <div className="p-6">
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="space-y-1">
+                          <div className="text-sm text-muted-foreground">
+                            Current Price
+                          </div>
+                          <div className="text-2xl font-semibold">$24.50</div>
+                        </div>
+                        <Badge
+                          variant={ipo.isPositive ? 'default' : 'destructive'}
+                          className="h-6"
+                        >
+                          {ipo.change}
+                        </Badge>
+                      </div>
+                      <div className="h-[200px] -mx-2">
+                        <PriceChart data={mockPriceData} />
+                      </div>
+                    </div>
+                  </Card>
+                </div>
+
+                {/* Quick Actions */}
+                <div className="pt-4 mt-8 border-t border-border/50">
+                  <div className="flex flex-wrap gap-3">
                     {companyDetails?.weburl && (
                       <Button
                         variant="outline"
-                        className="mt-4"
+                        size="sm"
                         onClick={() =>
                           window.open(companyDetails.weburl, '_blank')
                         }
+                        className="h-9 text-sm bg-background hover:bg-muted hover:border-brand/30"
                       >
                         <ExternalLink className="h-4 w-4 mr-2" />
                         Visit Website
                       </Button>
                     )}
-                  </Card>
-
-                  {/* Key Highlights */}
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <Card className="p-6">
-                      <h3 className="text-lg font-semibold mb-4">
-                        Investment Highlights
-                      </h3>
-                      <div className="space-y-4">
-                        {ipo.highlights?.map((highlight, index) => (
-                          <div
-                            key={index}
-                            className="flex items-start gap-3 text-sm"
-                          >
-                            <div className="mt-1">
-                              <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                            </div>
-                            <p className="text-muted-foreground">{highlight}</p>
-                          </div>
-                        ))}
-                      </div>
-                    </Card>
-
-                    <Card className="p-6">
-                      <h3 className="text-lg font-semibold mb-4">
-                        Risk Factors
-                      </h3>
-                      <div className="space-y-2">
-                        {getRiskFactors().map((risk, index) => (
-                          <div
-                            key={index}
-                            className="flex items-center justify-between text-sm"
-                          >
-                            <span className="text-muted-foreground">
-                              {risk.name}
-                            </span>
-                            <RiskBadge level={risk.level} />
-                          </div>
-                        ))}
-                      </div>
-                    </Card>
-                  </div>
-
-                  {/* Market Performance */}
-                  <Card className="p-6">
-                    <div className="flex items-center justify-between mb-6">
-                      <h3 className="text-lg font-semibold">
-                        Expected Performance
-                      </h3>
-                      <HoverCard>
-                        <HoverCardTrigger asChild>
-                          <Button variant="ghost" size="icon">
-                            <Info className="h-4 w-4" />
-                          </Button>
-                        </HoverCardTrigger>
-                        <HoverCardContent>
-                          <p className="text-sm text-muted-foreground">
-                            Projected performance based on market analysis and
-                            comparable companies.
-                          </p>
-                        </HoverCardContent>
-                      </HoverCard>
-                    </div>
-                    <div className="h-[300px]">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <AreaChart data={mockPriceData}>
-                          <defs>
-                            <linearGradient
-                              id="colorPrice"
-                              x1="0"
-                              y1="0"
-                              x2="0"
-                              y2="1"
-                            >
-                              <stop
-                                offset="5%"
-                                stopColor="hsl(var(--brand))"
-                                stopOpacity={0.1}
-                              />
-                              <stop
-                                offset="95%"
-                                stopColor="hsl(var(--brand))"
-                                stopOpacity={0}
-                              />
-                            </linearGradient>
-                          </defs>
-                          <CartesianGrid strokeDasharray="3 3" opacity={0.1} />
-                          <XAxis
-                            dataKey="date"
-                            tickLine={false}
-                            axisLine={false}
-                            tick={{ fontSize: 12 }}
-                          />
-                          <YAxis
-                            tickLine={false}
-                            axisLine={false}
-                            tick={{ fontSize: 12 }}
-                          />
-                          <Tooltip
-                            contentStyle={{
-                              background: 'hsl(var(--background))',
-                              border: '1px solid hsl(var(--border))',
-                              borderRadius: '6px',
-                            }}
-                          />
-                          <Area
-                            type="monotone"
-                            dataKey="price"
-                            stroke="hsl(var(--brand))"
-                            strokeWidth={2}
-                            fillOpacity={1}
-                            fill="url(#colorPrice)"
-                          />
-                        </AreaChart>
-                      </ResponsiveContainer>
-                    </div>
-                  </Card>
-                </div>
-              </TabsContent>
-
-              <TabsContent value="timeline">
-                <Card className="p-6">
-                  <div className="flex items-center justify-between mb-6">
-                    <h3 className="text-lg font-semibold">IPO Timeline</h3>
-                    <Button variant="outline" size="sm">
-                      <Calendar className="h-4 w-4 mr-2" />
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => window.open('#', '_blank')}
+                      className="h-9 text-sm bg-background hover:bg-muted hover:border-brand/30"
+                    >
+                      <FileText className="h-4 w-4 mr-2" />
+                      Download Prospectus
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => window.open('#', '_blank')}
+                      className="h-9 text-sm bg-background hover:bg-muted hover:border-brand/30"
+                    >
+                      <CalendarPlus className="h-4 w-4 mr-2" />
                       Add to Calendar
                     </Button>
                   </div>
-                  <IPOTimeline stages={timelineStages} />
+                </div>
+              </div>
+
+              {/* Sidebar */}
+              <div className="space-y-6">
+                {/* Price Card */}
+                <Card className="p-6 sticky top-6 border-border/50 bg-card/50 backdrop-blur">
+                  <div className="flex items-baseline justify-between mb-6">
+                    <div>
+                      <div className="text-2xl font-semibold">
+                        {ipo.valuation || 'TBA'}
+                      </div>
+                      <div className="text-sm text-muted-foreground">
+                        Expected Valuation
+                      </div>
+                    </div>
+                    <Badge variant={ipo.isPositive ? 'default' : 'destructive'}>
+                      {ipo.change}
+                    </Badge>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground">
+                        Market Interest
+                      </span>
+                      <span className="font-medium">{ipo.interest}%</span>
+                    </div>
+                    <Progress
+                      value={ipo.interest}
+                      className="h-1.5 bg-primary/10"
+                    />
+
+                    <Button
+                      className="w-full"
+                      onClick={() => window.open('#', '_blank')}
+                    >
+                      Register Interest
+                    </Button>
+
+                    <Button
+                      variant="outline"
+                      className="w-full"
+                      onClick={handleNotification}
+                    >
+                      <Bell className="h-4 w-4 mr-2" />
+                      Get Notified
+                    </Button>
+                  </div>
                 </Card>
-              </TabsContent>
 
-              <TabsContent value="financials">
-                <FinancialsTab ipo={ipo} details={companyDetails} />
-              </TabsContent>
+                {/* Timeline Card */}
+                <Card className="overflow-hidden border-border/50 bg-card/50 backdrop-blur">
+                  <div className="p-6">
+                    <h3 className="text-lg font-medium mb-6">IPO Timeline</h3>
+                    <div className="relative">
+                      {/* Continuous background line */}
+                      <div className="absolute left-4 top-4 w-0.5 h-[calc(100%-2rem)] bg-border/30" />
 
-              <TabsContent value="insights">
-                <InsightsTab ipo={ipo} />
-              </TabsContent>
-            </Tabs>
-          </div>
-        )}
+                      {timelineStages.map((stage, index) => (
+                        <div key={stage.id} className="mb-8 last:mb-0">
+                          <div className="flex items-start gap-4">
+                            <div className="relative">
+                              <div
+                                className={cn(
+                                  'w-8 h-8 rounded-full flex items-center justify-center relative z-10',
+                                  stage.status === 'completed'
+                                    ? 'bg-brand/10 text-brand'
+                                    : stage.status === 'current'
+                                    ? 'bg-brand/10 border-2 border-brand text-brand'
+                                    : 'bg-muted/50 border-2 border-border text-muted-foreground'
+                                )}
+                              >
+                                {stage.status === 'completed' ? (
+                                  <CheckCircle2 className="h-5 w-5 fill-brand text-background" />
+                                ) : (
+                                  <span className="text-sm font-medium">
+                                    {index + 1}
+                                  </span>
+                                )}
+                              </div>
+                              {index < timelineStages.length - 1 && (
+                                <div
+                                  className={cn(
+                                    'absolute top-4 left-1/2 w-0.5 -translate-x-1/2 h-[calc(100%+2rem)]',
+                                    stage.status === 'completed'
+                                      ? 'bg-gradient-to-b from-brand to-brand'
+                                      : stage.status === 'current'
+                                      ? 'bg-gradient-to-b from-brand via-brand/40 to-border/30'
+                                      : 'bg-border/30'
+                                  )}
+                                />
+                              )}
+                            </div>
+                            <div className="flex-1 pt-1 space-y-1.5">
+                              <div className="flex items-center justify-between">
+                                <h4
+                                  className={cn(
+                                    'font-medium',
+                                    stage.status === 'completed'
+                                      ? 'text-brand'
+                                      : stage.status === 'current'
+                                      ? 'text-foreground'
+                                      : 'text-muted-foreground'
+                                  )}
+                                >
+                                  {stage.title}
+                                </h4>
+                                <time
+                                  className={cn(
+                                    'text-xs',
+                                    stage.status === 'completed'
+                                      ? 'text-brand'
+                                      : 'text-muted-foreground'
+                                  )}
+                                >
+                                  {stage.date}
+                                </time>
+                              </div>
+                              <p className="text-sm text-muted-foreground leading-relaxed">
+                                {stage.description}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </Card>
+              </div>
+            </div>
+          )}
+        </div>
       </DialogContent>
     </Dialog>
   );
@@ -524,84 +574,13 @@ function LoadingState() {
         <Skeleton className="h-4 w-1/4" />
         <Skeleton className="h-4 w-3/4" />
       </div>
-      <div className="grid md:grid-cols-2 gap-4">
-        <Skeleton className="h-[200px]" />
-        <Skeleton className="h-[200px]" />
+      <div className="grid grid-cols-3 gap-4">
+        <Skeleton className="h-[100px]" />
+        <Skeleton className="h-[100px]" />
+        <Skeleton className="h-[100px]" />
       </div>
+      <Skeleton className="h-[200px]" />
     </div>
-  );
-}
-
-function QuickActionCard({
-  icon,
-  title,
-  description,
-  onClick,
-}: {
-  icon: React.ReactNode;
-  title: string;
-  description: string;
-  onClick: () => void;
-}) {
-  return (
-    <Card
-      className="p-4 hover:bg-muted/50 cursor-pointer transition-colors"
-      onClick={onClick}
-    >
-      <div className="flex items-start gap-3">
-        <div className="p-2 rounded-md bg-primary/10 text-primary">{icon}</div>
-        <div>
-          <h4 className="font-medium text-sm">{title}</h4>
-          <p className="text-xs text-muted-foreground">{description}</p>
-        </div>
-      </div>
-    </Card>
-  );
-}
-
-function MetricCard({
-  title,
-  value,
-  change,
-  trend,
-  badge,
-  icon,
-  description,
-}: {
-  title: string;
-  value: string | number;
-  change?: string;
-  trend?: React.ReactNode;
-  badge?: React.ReactNode;
-  icon: React.ReactNode;
-  description: string;
-}) {
-  return (
-    <Card className="p-4">
-      <div className="flex items-center justify-between mb-2">
-        <h3 className="text-sm font-medium text-muted-foreground">{title}</h3>
-        <div className="text-muted-foreground">{icon}</div>
-      </div>
-      <div className="flex items-baseline gap-2">
-        <div className="text-2xl font-bold">{value}</div>
-        {change && (
-          <div
-            className={cn(
-              'text-sm',
-              change.startsWith('+')
-                ? 'text-green-500'
-                : change.startsWith('-')
-                ? 'text-red-500'
-                : 'text-muted-foreground'
-            )}
-          >
-            {change}
-          </div>
-        )}
-      </div>
-      {(trend || badge) && <div className="mt-1">{trend || badge}</div>}
-      <p className="text-xs text-muted-foreground mt-2">{description}</p>
-    </Card>
   );
 }
 
@@ -625,19 +604,6 @@ function RiskBadge({ level }: { level: 'low' | 'medium' | 'high' }) {
   );
 }
 
-function getStatusLabel(status: string | undefined): string {
-  switch (status) {
-    case 'Next Week':
-      return '🚀 Coming Soon';
-    case 'Completed':
-      return '✓ Listed';
-    case 'Filing':
-      return '📝 In Progress';
-    default:
-      return '⏳ Upcoming';
-  }
-}
-
 function getRiskFactors() {
   return [
     { name: 'Market Competition', level: 'medium' as const },
@@ -646,72 +612,4 @@ function getRiskFactors() {
     { name: 'Technology Risk', level: 'medium' as const },
     { name: 'Economic Conditions', level: 'high' as const },
   ];
-}
-
-function FinancialsTab({
-  ipo,
-  details,
-}: {
-  ipo: IPO;
-  details: CompanyDetails | null;
-}) {
-  // Mock financial data
-  const financialMetrics = {
-    revenueGrowth: '45%',
-    marketShare: '12%',
-  };
-
-  return (
-    <div className="grid gap-6">
-      <Card className="p-6">
-        <h3 className="text-lg font-semibold mb-4">
-          Financial Overview - {ipo.name}
-        </h3>
-        <div className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <h4 className="text-sm font-medium mb-2">Revenue Growth</h4>
-              <p className="text-2xl font-bold">
-                {financialMetrics.revenueGrowth}
-              </p>
-            </div>
-            <div>
-              <h4 className="text-sm font-medium mb-2">Market Share</h4>
-              <p className="text-2xl font-bold">
-                {financialMetrics.marketShare}
-              </p>
-            </div>
-          </div>
-          {details && (
-            <div className="text-sm text-muted-foreground">
-              {details.description}
-            </div>
-          )}
-        </div>
-      </Card>
-    </div>
-  );
-}
-
-function InsightsTab({ ipo }: { ipo: IPO }) {
-  return (
-    <div className="grid gap-6">
-      <Card className="p-6">
-        <h3 className="text-lg font-semibold mb-4">Market Insights</h3>
-        <div className="space-y-4">
-          <div>
-            <h4 className="text-sm font-medium mb-2">Market Sentiment</h4>
-            <p className="text-2xl font-bold">{ipo.interest}%</p>
-            <p className="text-sm text-muted-foreground mt-1">
-              Based on investor interest and market analysis
-            </p>
-          </div>
-          <div>
-            <h4 className="text-sm font-medium mb-2">Trading Status</h4>
-            <Badge variant="outline">{ipo.status || 'Upcoming'}</Badge>
-          </div>
-        </div>
-      </Card>
-    </div>
-  );
 }
