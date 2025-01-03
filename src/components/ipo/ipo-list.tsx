@@ -11,9 +11,16 @@ import { useToast } from '@/hooks/use-toast';
 import { useDebounce } from '@/hooks/use-debounce';
 import { IPO } from '@/types/ipo';
 import { IPOFilters } from './ipo-filters';
-import { type Filters, type FilterKey, type SortOption } from './types';
+import { type Filters, type FilterKey } from './types';
 
 const MIN_LOADING_TIME = 250;
+const INITIAL_FILTERS: Filters = {
+  searchQuery: '',
+  sector: 'all',
+  exchange: 'all',
+  sortBy: 'date',
+  limit: 25,
+};
 
 interface IPOListProps {
   onIPOsLoaded?: (ipos: IPO[]) => void;
@@ -21,14 +28,9 @@ interface IPOListProps {
 
 export function IPOList({ onIPOsLoaded }: IPOListProps) {
   const { isWatched, addToWatchlist, removeFromWatchlist } = useWatchlist();
-  const [filters, setFilters] = useState<Filters>({
-    searchQuery: '',
-    sector: 'all',
-    exchange: 'all',
-    sortBy: 'date',
-    limit: 25,
-  });
+  const [filters, setFilters] = useState<Filters>(INITIAL_FILTERS);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [ipos, setIpos] = useState<IPO[]>([]);
   const { toast } = useToast();
 
@@ -37,25 +39,33 @@ export function IPOList({ onIPOsLoaded }: IPOListProps) {
 
   const loadIPOs = useCallback(async () => {
     const startTime = Date.now();
+    setError(null);
+
     try {
       const data = await fetchUpcomingIPOs(debouncedLimit);
 
-      if (!data || data.length === 0) {
+      if (!data?.length) {
         setIpos([]);
-      } else {
-        requestAnimationFrame(() => {
-          setIpos(data);
-          onIPOsLoaded?.(data);
-        });
+        return;
       }
+
+      // Use requestAnimationFrame for smooth UI updates
+      requestAnimationFrame(() => {
+        setIpos(data);
+        onIPOsLoaded?.(data);
+      });
     } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error occurred';
       console.error('Error loading IPOs:', error);
+      setError(errorMessage);
       toast({
         title: 'Error loading IPOs',
-        description: 'Please try again later.',
+        description: errorMessage,
         variant: 'destructive',
       });
     } finally {
+      // Ensure minimum loading time for better UX
       const elapsed = Date.now() - startTime;
       if (elapsed < MIN_LOADING_TIME) {
         await new Promise((resolve) =>
@@ -86,7 +96,7 @@ export function IPOList({ onIPOsLoaded }: IPOListProps) {
 
   const handleFilterChange = useCallback(
     <K extends FilterKey>(key: K, value: Filters[K]) => {
-      setFilters((prev) => ({ ...prev, [key]: value }));
+      setFilters((prev: Filters) => ({ ...prev, [key]: value }));
     },
     []
   );
@@ -94,33 +104,58 @@ export function IPOList({ onIPOsLoaded }: IPOListProps) {
   const filteredIpos = useMemo(() => {
     if (!ipos.length) return [];
 
-    const searchTerms = debouncedSearchQuery.toLowerCase().split(' ');
+    const searchTerms = debouncedSearchQuery
+      .toLowerCase()
+      .split(' ')
+      .filter(Boolean);
     const { sector, exchange, sortBy } = filters;
 
+    // First filter the IPOs
     const filtered = ipos.filter((ipo) => {
+      // Only perform text search if there are search terms
       if (searchTerms.length > 0) {
         const ipoText =
           `${ipo.name} ${ipo.sector} ${ipo.exchange} ${ipo.status}`.toLowerCase();
-        if (!searchTerms.every((term: string) => ipoText.includes(term))) {
+        if (!searchTerms.every((term) => ipoText.includes(term))) {
           return false;
         }
       }
 
+      // Apply sector and exchange filters
       return (
         (sector === 'all' || ipo.sector === sector) &&
         (exchange === 'all' || ipo.exchange === exchange)
       );
     });
 
+    // Then sort the filtered results
     return filtered.sort((a, b) => {
       switch (sortBy) {
         case 'name':
           return (a.name || '').localeCompare(b.name || '');
+        case 'valuation':
+          return (b.valuation || 0) - (a.valuation || 0);
+        case 'date':
         default:
           return parseDate(a.date) - parseDate(b.date);
       }
     });
   }, [ipos, debouncedSearchQuery, filters]);
+
+  if (error) {
+    return (
+      <Card className="p-12 text-center">
+        <div className="space-y-3">
+          <h3 className="text-lg font-semibold text-destructive">
+            Error Loading IPOs
+          </h3>
+          <p className="text-sm text-muted-foreground max-w-sm mx-auto">
+            {error}
+          </p>
+        </div>
+      </Card>
+    );
+  }
 
   return (
     <div className="space-y-6">
